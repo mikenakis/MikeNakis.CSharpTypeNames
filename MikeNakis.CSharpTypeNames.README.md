@@ -1,10 +1,14 @@
-# MikeNakis.CSharpTypeNames<br/><sub><sup>A tiny library that computes the name of any System.Type in human-readable C# notation.</sup></sub>
+# MikeNakis.CSharpTypeNames<br/><sub><sup>A tiny library that generates the human-readable name of any System.Type in C# notation.</sup></sub>
 
 <p align="center">
   <img title="MikeNakis.CSharpTypeNames Logo" src="MikeNakis.CSharpTypeNames-Logo.svg" width="256" />
 </p>
 
 [![Build](https://github.com/mikenakis/MikeNakis.CSharpTypeNames/actions/workflows/github-workflow.yml/badge.svg)](https://github.com/mikenakis/MikeNakis.CSharpTypeNames/actions/workflows/github-workflow.yml)
+
+For an in-depth explanation of the problem that this library solves, see the following blog post:
+
+ - [michael.gr - Human-readable names of DotNet types in C# notation](https://blog.michael.gr/2025/05/human-readable-names-of-dotnet-types-in.html)
 
 ## License
 
