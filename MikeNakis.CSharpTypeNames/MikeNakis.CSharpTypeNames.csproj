@@ -5,8 +5,28 @@
 		<Configurations>Debug;Optimized;Release;Develop</Configurations>
 		<!-- AssemblyName: The default is $(MSBuildProjectName) -->
 		<AssemblyName>$(MSBuildProjectName)-$(Configuration)</AssemblyName>
+
 		<!-- Get version from environment variable, because it is computed by the build server script. -->
 		<Version>$(RELEASE_VERSION)</Version>
+		<!-- PackageId: the default is $(MSBuildProjectName) -->
+		<!--<PackageId>$(AssemblyName)</PackageId>-->
+		<!-- Title: the default appears to be $(MSBuildProjectName) if equal to $(AssemblyName), blank otherwise. -->
+		<Title>$(MSBuildProjectName) ($(Configuration))</Title>
+		<Authors>MikeNakis</Authors>
+		<Description>A tiny library that computes the name of any System.Type in human-readable C# notation</Description>
+		<Copyright>Copyright © Mike Nakis. All rights reserved.</Copyright>
+		<PackageIcon>MikeNakis.CSharpTypeNames-Logo.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/mikenakis/MikeNakis.CSharpTypeNames.git</RepositoryUrl>
+		<PublishRepositoryUrl>True</PublishRepositoryUrl>
+		<PackageTags>dotnet; netstandard; class-libraries; utilities</PackageTags>
+		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+	    <PackageReadmeFile>README.md</PackageReadmeFile>			
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<PackageReleaseNotes>initial release</PackageReleaseNotes>
+		<IncludeSymbols Condition="'$(Configuration)' == 'Release'">True</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<!--<PackRelease Condition="'$(Configuration)' == 'Debug'">False</PackRelease>-->
 	</PropertyGroup>
 
 	<Import Project="..\AllProjects.proj.xml" />
@@ -16,26 +36,6 @@
 
 	<Target Name="PrepareForPack" BeforeTargets="Pack">
         <Message Importance="High" Text="Pack: RELEASE_VERSION=$(RELEASE_VERSION)  Version=$(Version)  PackageVersion=$(PackageVersion)"/>		
-		<PropertyGroup>
-			<!-- PackageId: the default is $(MSBuildProjectName) -->
-			<!--<PackageId>$(AssemblyName)</PackageId>-->
-			<!-- Title: the default appears to be $(MSBuildProjectName) if equal to $(AssemblyName), blank otherwise. -->
-			<Title>$(MSBuildProjectName) ($(Configuration))</Title>
-			<Authors>MikeNakis</Authors>
-			<Description>A tiny library that computes the name of any System.Type in human-readable C# notation</Description>
-			<Copyright>Copyright © Mike Nakis. All rights reserved.</Copyright>
-			<PackageIcon>MikeNakis.CSharpTypeNames-Logo.png</PackageIcon>
-			<PackageReadmeFile>README.md</PackageReadmeFile>
-			<RepositoryUrl>https://github.com/mikenakis/MikeNakis.CSharpTypeNames.git</RepositoryUrl>
-			<PublishRepositoryUrl>True</PublishRepositoryUrl>
-			<PackageTags>dotnet; netstandard; class-libraries; utilities</PackageTags>
-			<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-			<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-			<PackageReleaseNotes>initial release</PackageReleaseNotes>
-			<IncludeSymbols Condition="'$(Configuration)' == 'Release'">True</IncludeSymbols>
-			<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-			<!--<PackRelease Condition="'$(Configuration)' == 'Debug'">False</PackRelease>-->
-		</PropertyGroup>
 	</Target>
 
 	<ItemGroup>
