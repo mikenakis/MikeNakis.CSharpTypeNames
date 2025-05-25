@@ -10,6 +10,15 @@ For an in-depth explanation of the problem that this library solves, see the fol
 
  - [michael.gr - Human-readable names of DotNet types in C# notation](https://blog.michael.gr/2025/05/human-readable-names-of-dotnet-types-in.html)
 
+## How to use
+
+    using MikeNakis.CSharpTypeNames.Extensions;
+
+	    string typeName = typeof( int ).GetCSharpName();
+
+The method accepts an optional parameter with customization options, allowing you to specify how you would like it to
+generate the type name.
+
 ## License
 
 **All rights reserved.**

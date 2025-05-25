@@ -24,17 +24,7 @@ public static class CSharpTypeNameGenerator
 	/// <summary>Generates the human-readable name of a <see cref="Sys.Type"/> using C# notation.</summary>
 	/// <param name="type">The <see cref="Sys.Type"/> whose name is to be generated.</param>
 	/// <param name="options">Specifies how the name will be generated. Default is <see cref="Options.None"/>.</param>
-	/// <remarks>
-	/// PEARL: DotNet internally represents the names of types in a cryptic way which greatly differs from the way they are
-	/// specified in C# source code:<para/>
-	/// <list type="bullet">
-	/// <item>Generic types are suffixed with a back-quote character, followed by the number of generic parameters.</item>
-	/// <item>Constructed generic types are further suffixed with a list of assembly-qualified type names, one for each generic parameter.</item>
-	/// <item>Nested class names are delimited with '+' instead of '.'.</item>
-	/// </list>
-	/// PEARL-ON-PEARL: Dotnet does not provide any means of converting such cryptic type names to C# notation.<para/>
-	/// This method fixes all this insanity.<para/>
-	/// </remarks>
+	/// <returns>The human-readable name of the given <see cref="Sys.Type"/> in C# notation..</returns>
 	public static string GetCSharpTypeName( Sys.Type type, Options options = Options.None )
 	{
 		if( type.IsGenericParameter ) //if a generic parameter is directly passed, always yield its name.
@@ -55,7 +45,9 @@ public static class CSharpTypeNameGenerator
 			{
 				recurse( type.GetElementType()! );
 				stringBuilder.Append( '[' );
-				stringBuilder.Append( ',', type.GetArrayRank() - 1 );
+				int rank = type.GetArrayRank();
+				SysDiag.Debug.Assert( rank >= 1 );
+				stringBuilder.Append( ',', rank - 1 );
 				stringBuilder.Append( ']' );
 				return;
 			}
