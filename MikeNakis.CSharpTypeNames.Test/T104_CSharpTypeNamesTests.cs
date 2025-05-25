@@ -1,7 +1,6 @@
 namespace MikeNakis.CSharpTypeNames.Test;
 
 using MikeNakis.CSharpTypeNames.Extensions;
-using MikeNakis.Kit.Extensions;
 using CodeDom = Sys.CodeDom;
 using CSharp = Microsoft.CSharp;
 using VSTesting = Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -12,8 +11,6 @@ public sealed class T104_CSharpTypeNamesTests
 	[VSTesting.TestMethod]
 	public void Test()
 	{
-		var cSharpCompiler = new CSharp.CSharpCodeProvider();
-
 		test( typeof( sbyte ) );
 		test( typeof( byte ) );
 		test( typeof( short ) );
@@ -27,9 +24,12 @@ public sealed class T104_CSharpTypeNamesTests
 		test( typeof( double ) );
 		test( typeof( bool ) );
 		test( typeof( decimal ) );
-
 		test( typeof( object ) );
 		test( typeof( string ) );
+		test( typeof( void ) );
+		test( typeof( nint ) );
+		test( typeof( nuint ) );
+
 		test( typeof( Sys.Int128 ) );
 		test( typeof( Sys.Guid ) );
 
@@ -106,10 +106,11 @@ public sealed class T104_CSharpTypeNamesTests
 		test( typeof( C0<bool>.C1B<byte, char>.C2B<long> ).GetField( nameof( C0<int>.C1B<int, int>.C2B<int>.F3 ) )!.FieldType );
 		test( typeof( C0<bool>.C1B<byte, char>.C2B<long> ).GetField( nameof( C0<int>.C1B<int, int>.C2B<int>.F4 ) )!.FieldType );
 
-		void test( Sys.Type type )
+		static void test( Sys.Type type )
 		{
-			string generatedTypeName = type.GetCSharpName();
-			string expectedTypeName = getTypeNameFromCSharpCompiler( type, cSharpCompiler );
+			string generatedTypeName = type.GetCSharpName( Options.UseBuiltInTypeNameAliases );
+			Sys.Console.WriteLine( generatedTypeName );
+			string expectedTypeName = getTypeNameFromCSharpCompiler( type );
 			if( generatedTypeName != expectedTypeName )
 			{
 				Sys.Console.WriteLine( $"CSharpCompiler gives: {expectedTypeName}" );
@@ -119,8 +120,9 @@ public sealed class T104_CSharpTypeNamesTests
 		}
 	}
 
-	static string getTypeNameFromCSharpCompiler( Sys.Type type, CSharp.CSharpCodeProvider cSharpCompiler )
+	static string getTypeNameFromCSharpCompiler( Sys.Type type )
 	{
+		var cSharpCompiler = new CSharp.CSharpCodeProvider();
 		var typeRef = new CodeDom.CodeTypeReference( type );
 		string typeName = cSharpCompiler.GetTypeOutput( typeRef );
 		//PEARL: Microsoft.CSharp.CSharpCodeProvider has a bug where it includes superfluous spaces in the generated type names. We remove them here.
@@ -132,7 +134,6 @@ public sealed class T104_CSharpTypeNamesTests
 		string fullName = type.FullName!;
 		if( fullName == null )
 			return type.Name;
-		fullName = RegEx.Regex.Replace( fullName, @", .+?, Version=.+?, Culture=.+?, PublicKeyToken=[0123456789abcdef]+", "..." );
-		return fullName.SafeSubstring( 0, 200, true );
+		return RegEx.Regex.Replace( fullName, @", .+?, Version=.+?, Culture=.+?, PublicKeyToken=[0123456789abcdef]+", "(...)" );
 	}
 }

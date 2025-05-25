@@ -1,5 +1,5 @@
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
-#pragma warning disable CA1852 // Type '{}' can be sealed because...
+#pragma warning disable CA1852 // Seal internal types
 
 class C0<T1>
 {
