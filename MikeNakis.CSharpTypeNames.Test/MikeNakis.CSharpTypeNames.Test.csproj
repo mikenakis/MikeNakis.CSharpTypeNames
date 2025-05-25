@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<IsTestProject>True</IsTestProject>
+		<Configurations>Debug</Configurations>
+	</PropertyGroup>
+
+	<Import Project="..\AllProjects.proj.xml" />
+	<Import Project="..\BannedApiAnalyzers.proj.xml" />
+
+	<ItemGroup>
+		<PackageReference Include="System.CodeDom" Version="9.0.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\MikeNakis.CSharpTypeNames\MikeNakis.CSharpTypeNames.csproj" />
+	</ItemGroup>
+	
+</Project>
