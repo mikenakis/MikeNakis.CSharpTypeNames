@@ -22,8 +22,8 @@ TODO:
 
 - Add handling for tuples
 - Add the ability to specify whether to emit generic parameter names. (Default is to leave blank.)
-- Add the ability to specify whether <see cref="Sys.Nullable{T}" /> should be replaced with <c>T?</c> (separately from 'useAliases')
-- See if the code can be further simplified. (<c>recurse2()</c> can probably be merged into <c>recurse()</c>)<para/>
+- Add the ability to specify whether `Sys.Nullable<T>` should be replaced with `T?` (separately from `useAliases`)
+- See if the code can be further simplified. (Might be able to merge `recurse2()` into `recurse()`)
 
 ----------------------
 Cover image: The MikeNakis.CSharpTypeNames logo, by Mike Nakis.

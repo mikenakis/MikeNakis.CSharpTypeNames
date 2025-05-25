@@ -1,6 +1,7 @@
 namespace MikeNakis.CSharpTypeNames.Test;
 
 using MikeNakis.CSharpTypeNames.Extensions;
+using MikeNakis.Kit.Extensions;
 using CodeDom = Sys.CodeDom;
 using CSharp = Microsoft.CSharp;
 using VSTesting = Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -109,7 +110,12 @@ public sealed class T104_CSharpTypeNamesTests
 		{
 			string generatedTypeName = type.GetCSharpName();
 			string expectedTypeName = getTypeNameFromCSharpCompiler( type, cSharpCompiler );
-			SysDiag.Debug.Assert( generatedTypeName == expectedTypeName );
+			if( generatedTypeName != expectedTypeName )
+			{
+				Sys.Console.WriteLine( $"CSharpCompiler gives: {expectedTypeName}" );
+				Sys.Console.WriteLine( $"The Runtime gives:    {getTypeNameFromRuntime( type )}" );
+				SysDiag.Debug.Assert( false );
+			}
 		}
 	}
 
@@ -119,5 +125,14 @@ public sealed class T104_CSharpTypeNamesTests
 		string typeName = cSharpCompiler.GetTypeOutput( typeRef );
 		//PEARL: Microsoft.CSharp.CSharpCodeProvider has a bug where it includes superfluous spaces in the generated type names. We remove them here.
 		return typeName.Replace( " ", "", Sys.StringComparison.Ordinal );
+	}
+
+	static string getTypeNameFromRuntime( Sys.Type type )
+	{
+		string fullName = type.FullName!;
+		if( fullName == null )
+			return type.Name;
+		fullName = RegEx.Regex.Replace( fullName, @", .+?, Version=.+?, Culture=.+?, PublicKeyToken=[0123456789abcdef]+", "..." );
+		return fullName.SafeSubstring( 0, 200, true );
 	}
 }
