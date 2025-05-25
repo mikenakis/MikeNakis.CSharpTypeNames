@@ -5,6 +5,8 @@
 		<Configurations>Debug;Optimized;Release;Develop</Configurations>
 		<!-- AssemblyName: The default is $(MSBuildProjectName) -->
 		<AssemblyName>$(MSBuildProjectName)-$(Configuration)</AssemblyName>
+		<!-- Get version from environment variable, because it is computed by the build server script. -->
+		<Version>$(RELEASE_VERSION)</Version>
 	</PropertyGroup>
 
 	<Import Project="..\AllProjects.proj.xml" />
@@ -13,11 +15,10 @@
 	<!-- NuGet Packaging ******************************************************************************************* -->
 
 	<Target Name="PrepareForPack" BeforeTargets="Pack">
+        <Message Importance="High" Text="Pack: RELEASE_VERSION=$(RELEASE_VERSION)  Version=$(Version)  PackageVersion=$(PackageVersion)"/>		
 		<PropertyGroup>
 			<!-- PackageId: the default is $(MSBuildProjectName) -->
 			<!--<PackageId>$(AssemblyName)</PackageId>-->
-			<!-- Get version from environment variable, because it is computed by the build server script. -->
-			<Version>$(RELEASE_VERSION)</Version>
 			<!-- Title: the default appears to be $(MSBuildProjectName) if equal to $(AssemblyName), blank otherwise. -->
 			<Title>$(MSBuildProjectName) ($(Configuration))</Title>
 			<Authors>MikeNakis</Authors>
