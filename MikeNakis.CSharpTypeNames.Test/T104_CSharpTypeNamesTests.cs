@@ -108,7 +108,7 @@ public sealed class T104_CSharpTypeNamesTests
 
 		static void test( Sys.Type type )
 		{
-			string generatedTypeName = type.GetCSharpName( Options.UseBuiltInTypeNameAliases );
+			string generatedTypeName = type.GetCSharpName( Options.UseLanguageKeywordsForBuiltInTypes );
 			Sys.Console.WriteLine( generatedTypeName );
 			string expectedTypeName = getTypeNameFromCSharpCompiler( type );
 			if( generatedTypeName != expectedTypeName )

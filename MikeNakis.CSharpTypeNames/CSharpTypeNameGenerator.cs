@@ -6,25 +6,37 @@ public enum Options
 	/// <summary>Specifies no options.</summary>
 	None = 0,
 
-	/// <summary>Specifies that name aliases should be emitted for built-in types. For example, <b><c>int</c></b> instead of <b><c>System.Int32</c></b>.</summary>
-	UseBuiltInTypeNameAliases = 1 << 0,
+	/// <summary>Specifies that language keywords for built-in types should be used.</summary>
+	/// <remarks>For example, <b><c>int</c></b> will be generated instead of <b><c>System.Int32</c></b>.</remarks>
+	UseLanguageKeywordsForBuiltInTypes = 1 << 0,
 
-	/// <summary>Specifies that shorthand notation for nullable value types should be used. For example, <b><c>System.DateTime?</c></b> instead of <b><c>System.Nullable&lt;System.DateTime&gt;</c></b>.</summary>
-	UseNullableShorthand = 1 << 1,
+	/// <summary>Specifies that shorthand notation for nullable value types should be used.</summary>
+	/// <remarks>For example, <b><c>System.DateTime?</c></b> will be generated instead of <b><c>System.Nullable&lt;System.DateTime&gt;</c></b>.</remarks>
+	UseNullableShorthandNotation = 1 << 1,
 
-	/// <summary>Specifies that generic parameter names should be emitted rather than left blank. For example, <b><c>System.Collections.Generic.Dictionary&lt;TKey,TValue&gt;</c></b> instead of <b><c>System.Collections.Generic.Dictionary&lt;,&gt;</c></b>.</summary>
-	UseGenericParameters = 1 << 2,
+	/// <summary>Specifies that generic parameter names should be used rather than left blank.</summary>
+	/// <remarks>For example, <b><c>System.Collections.Generic.Dictionary&lt;TKey,TValue&gt;</c></b> will be generated instead of <b><c>System.Collections.Generic.Dictionary&lt;,&gt;</c></b>.</remarks>
+	UseGenericParameterNames = 1 << 2,
 
-	/// <summary>Specifies that 'nint' and 'nuint' should be emitted instead of `System.IntPtr` and `System.UIntPtr` respectively. Only valid if <see cref="UseBuiltInTypeNameAliases" /> is also specified.</summary>
-	UseNIntAndNUIntAliases = 1 << 3,
+	/// <summary>Specifies that <b><c>nint</c></b> and <b><c>nuint</c></b> should be used instead of <b><c>System.IntPtr</c></b> and <b><c>System.UIntPtr</c></b> respectively.</summary>
+	/// <remarks>Only valid if <see cref="UseLanguageKeywordsForBuiltInTypes" /> is also specified.</remarks>
+	UseLanguageKeywordsForNativeIntegers = 1 << 3,
+
+	/// <summary>Specifies that namespaces should not be used.</summary>
+	/// <remarks>For example, <b><c>DateTime</c></b> will be generated instead of <b><c>System.DateTime</c></b>.</remarks>
+	OmitNamespaces = 1 << 4,
+
+	/// <summary>Specifies that tuple notation should be used for value tuples.</summary>
+	/// <remarks>For example, <b><c>(System.Int32,System.String)</c></b> will be generated instead of <b><c>System.ValueTuple&lt;System.Int32,System.String&gt;</c></b>.</remarks>
+	UseTupleShorthandNotation = 1 << 5,
 }
 
 public static class CSharpTypeNameGenerator
 {
 	/// <summary>Generates the human-readable name of a <see cref="Sys.Type"/> using C# notation.</summary>
 	/// <param name="type">The <see cref="Sys.Type"/> whose name is to be generated.</param>
-	/// <param name="options">Specifies how the name will be generated. Default is <see cref="Options.None"/>.</param>
-	/// <returns>The human-readable name of the given <see cref="Sys.Type"/> in C# notation..</returns>
+	/// <param name="options">Specifies how the name will be generated. If omitted, the default is <see cref="Options.None"/>.</param>
+	/// <returns>The human-readable name of the given <see cref="Sys.Type"/> in C# notation.</returns>
 	public static string GetCSharpTypeName( Sys.Type type, Options options = Options.None )
 	{
 		if( type.IsGenericParameter ) //if a generic parameter is directly passed, always yield its name.
@@ -37,7 +49,8 @@ public static class CSharpTypeNameGenerator
 		{
 			if( type.IsGenericParameter )
 			{
-				stringBuilder.Append( options.HasFlag( Options.UseGenericParameters ) ? type.Name : "" );
+				if( options.HasFlag( Options.UseGenericParameterNames ) )
+					stringBuilder.Append( type.Name );
 				return;
 			}
 
@@ -52,17 +65,17 @@ public static class CSharpTypeNameGenerator
 				return;
 			}
 
-			if( options.HasFlag( Options.UseBuiltInTypeNameAliases ) )
+			if( options.HasFlag( Options.UseLanguageKeywordsForBuiltInTypes ) )
 			{
-				string? alias = getBuiltInTypeNameAlias( type, options.HasFlag( Options.UseNIntAndNUIntAliases ) );
-				if( alias != null )
+				string? languageKeyword = getLanguageKeywordIfBuiltInType( type, options.HasFlag( Options.UseLanguageKeywordsForNativeIntegers ) );
+				if( languageKeyword != null )
 				{
-					stringBuilder.Append( alias );
+					stringBuilder.Append( languageKeyword );
 					return;
 				}
 			}
 
-			if( options.HasFlag( Options.UseNullableShorthand ) )
+			if( options.HasFlag( Options.UseNullableShorthandNotation ) )
 			{
 				var underlyingType = Sys.Nullable.GetUnderlyingType( type );
 				if( underlyingType != null )
@@ -71,6 +84,20 @@ public static class CSharpTypeNameGenerator
 					stringBuilder.Append( '?' );
 					return;
 				}
+			}
+
+			if( options.HasFlag( Options.UseTupleShorthandNotation ) && isValueTuple( type ) )
+			{
+				stringBuilder.Append( '(' );
+				var genericArguments = type.GetGenericArguments();
+				for( int i = 0; i < genericArguments.Length; i++ )
+				{
+					recurse( genericArguments[i] );
+					if( i + 1 < genericArguments.Length )
+						stringBuilder.Append( ',' );
+				}
+				stringBuilder.Append( ')' );
+				return;
 			}
 
 			Sys.Type[] allGenericArguments = type.GetGenericArguments();
@@ -86,10 +113,9 @@ public static class CSharpTypeNameGenerator
 				}
 				else
 				{
-					string? namespaceName = type.Namespace;
-					if( namespaceName != null )
+					if( type.Namespace != null && !options.HasFlag( Options.OmitNamespaces ) )
 					{
-						stringBuilder.Append( namespaceName );
+						stringBuilder.Append( type.Namespace );
 						stringBuilder.Append( '.' );
 					}
 				}
@@ -130,80 +156,48 @@ public static class CSharpTypeNameGenerator
 		}
 	}
 
-	static string? getBuiltInTypeNameAlias( Sys.Type type, bool useNIntAndNUIntAliases )
+	static bool isValueTuple( Sys.Type type )
 	{
-		if( ((Sys.Func<bool>)(() => true)).Invoke() )
+		if( !type.IsValueType )
+			return false;
+		if( type.IsGenericTypeDefinition )
+			return false;
+		//Unfortunately, ITuple does not seem to be available in netstandard2.0, so we have to do string comparison.
+		//return typeof( SysCompiler.ITuple ).IsAssignableFrom( type );
+		return type.FullName.StartsWith( "System.ValueTuple`", Sys.StringComparison.Ordinal );
+	}
+
+	static string? getLanguageKeywordIfBuiltInType( Sys.Type type, bool useLanguageKeywordsForNativeIntegers )
+	{
+		if( type == typeof( object ) )
+			return "object";
+		if( type == typeof( void ) )
+			return "void";
+		if( useLanguageKeywordsForNativeIntegers )
 		{
-			if( type == typeof( object ) )
-				return "object";
-			if( type == typeof( void ) )
-				return "void";
-			if( useNIntAndNUIntAliases )
-			{
-				if( type == typeof( nint ) )
-					return "nint";
-				if( type == typeof( nuint ) )
-					return "nuint";
-			}
-			return Sys.Type.GetTypeCode( type ) switch
-			{
-				Sys.TypeCode.SByte => "sbyte",
-				Sys.TypeCode.Byte => "byte",
-				Sys.TypeCode.Int16 => "short",
-				Sys.TypeCode.UInt16 => "ushort",
-				Sys.TypeCode.Int32 => "int",
-				Sys.TypeCode.UInt32 => "uint",
-				Sys.TypeCode.Int64 => "long",
-				Sys.TypeCode.UInt64 => "ulong",
-				Sys.TypeCode.Char => "char",
-				Sys.TypeCode.Single => "float",
-				Sys.TypeCode.Double => "double",
-				Sys.TypeCode.Boolean => "bool",
-				Sys.TypeCode.Decimal => "decimal",
-				Sys.TypeCode.Object => null, //typecode is 'object' for everything not in the list.
-				Sys.TypeCode.String => "string",
-				_ => null,
-			};
-		}
-		else
-		{
-			if( type == typeof( sbyte ) )
-				return "sbyte";
-			if( type == typeof( byte ) )
-				return "byte";
-			if( type == typeof( short ) )
-				return "short";
-			if( type == typeof( ushort ) )
-				return "ushort";
-			if( type == typeof( int ) )
-				return "int";
-			if( type == typeof( uint ) )
-				return "uint";
-			if( type == typeof( long ) )
-				return "long";
-			if( type == typeof( ulong ) )
-				return "ulong";
-			if( type == typeof( char ) )
-				return "char";
-			if( type == typeof( float ) )
-				return "float";
-			if( type == typeof( double ) )
-				return "double";
-			if( type == typeof( bool ) )
-				return "bool";
-			if( type == typeof( decimal ) )
-				return "decimal";
-			if( type == typeof( object ) )
-				return "object";
-			if( type == typeof( string ) )
-				return "string";
-			if( type == typeof( void ) )
-				return "void";
 			if( type == typeof( nint ) )
 				return "nint";
 			if( type == typeof( nuint ) )
 				return "nuint";
-			return null;
 		}
+		return Sys.Type.GetTypeCode( type ) switch
+		{
+			Sys.TypeCode.SByte => "sbyte",
+			Sys.TypeCode.Byte => "byte",
+			Sys.TypeCode.Int16 => "short",
+			Sys.TypeCode.UInt16 => "ushort",
+			Sys.TypeCode.Int32 => "int",
+			Sys.TypeCode.UInt32 => "uint",
+			Sys.TypeCode.Int64 => "long",
+			Sys.TypeCode.UInt64 => "ulong",
+			Sys.TypeCode.Char => "char",
+			Sys.TypeCode.Single => "float",
+			Sys.TypeCode.Double => "double",
+			Sys.TypeCode.Boolean => "bool",
+			Sys.TypeCode.Decimal => "decimal",
+			Sys.TypeCode.Object => null, //typecode is 'object' for everything not in the list.
+			Sys.TypeCode.String => "string",
+			_ => null,
+		};
 	}
 }
