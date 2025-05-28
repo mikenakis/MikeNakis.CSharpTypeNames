@@ -120,38 +120,42 @@ public static class CSharpTypeNameGenerator
 					}
 				}
 
+				string typeName = type.Name;
+
 				if( type.IsGenericType )
 				{
-					string typeName = type.Name;
-					int indexOfTick = typeName.LastIndexOf( '`' );
-					SysDiag.Debug.Assert( indexOfTick == typeName.IndexOf( '`' ) );
-					if( indexOfTick == -1 )
+					//PEARL: DotNet offers no means of obtaining the plain, unadulterated name of a generic type.
+					//    The only way to get the name of a type seems to be the `Name` property, but this property
+					//    returns a name that is polluted by a back-quote followed by a number, and there is nothing we
+					//    can do about that.
+					//    So, we have no option but to search for the back-quote and extract the part before it.
+					int indexOfBackQuote = typeName.LastIndexOf( '`' );
+					SysDiag.Debug.Assert( indexOfBackQuote == typeName.IndexOf( '`' ) );
+					if( indexOfBackQuote != -1 )
 					{
-						stringBuilder.Append( typeName );
+						stringBuilder.Append( typeName.Substring( 0, indexOfBackQuote ) );
+						stringBuilder.Append( '<' );
+						Sys.Type[] arguments = type.GetGenericArguments();
+						int start = type.IsNested ? type.DeclaringType!.GetGenericArguments().Length : 0;
+						SysDiag.Debug.Assert( arguments.Length - start == int.Parse( typeName.Substring( indexOfBackQuote + 1 ), SysGlob.CultureInfo.InvariantCulture ) );
+						for( int i = start; i < arguments.Length; i++ )
+						{
+							Sys.Type argument = arguments[i];
+							if( argument.IsGenericParameter )
+							{
+								int position = argument.GenericParameterPosition;
+								argument = allGenericArguments[position];
+							}
+							recurse( argument );
+							if( i + 1 < arguments.Length )
+								stringBuilder.Append( ',' );
+						}
+						stringBuilder.Append( '>' );
 						return;
 					}
-					stringBuilder.Append( typeName.Substring( 0, indexOfTick ) );
-					stringBuilder.Append( '<' );
-					Sys.Type[] arguments = type.GetGenericArguments();
-					int start = type.IsNested ? type.DeclaringType!.GetGenericArguments().Length : 0;
-					SysDiag.Debug.Assert( arguments.Length - start == int.Parse( typeName.Substring( indexOfTick + 1 ), SysGlob.CultureInfo.InvariantCulture ) );
-					for( int i = start; i < arguments.Length; i++ )
-					{
-						Sys.Type argument = arguments[i];
-						if( argument.IsGenericParameter )
-						{
-							int position = argument.GenericParameterPosition;
-							argument = allGenericArguments[position];
-						}
-						recurse( argument );
-						if( i + 1 < arguments.Length )
-							stringBuilder.Append( ',' );
-					}
-					stringBuilder.Append( '>' );
-					return;
 				}
 
-				stringBuilder.Append( type.Name );
+				stringBuilder.Append( typeName );
 			}
 		}
 	}
@@ -164,7 +168,7 @@ public static class CSharpTypeNameGenerator
 			return false;
 		//Unfortunately, ITuple does not seem to be available in netstandard2.0, so we have to do string comparison.
 		//return typeof( SysCompiler.ITuple ).IsAssignableFrom( type );
-		return type.FullName.StartsWith( "System.ValueTuple`", Sys.StringComparison.Ordinal );
+		return type.FullName != null && type.FullName.StartsWith( "System.ValueTuple`", Sys.StringComparison.Ordinal );
 	}
 
 	static string? getLanguageKeywordIfBuiltInType( Sys.Type type, bool useLanguageKeywordsForNativeIntegers )
