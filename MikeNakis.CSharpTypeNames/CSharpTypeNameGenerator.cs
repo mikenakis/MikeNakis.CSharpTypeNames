@@ -166,24 +166,17 @@ public static class CSharpTypeNameGenerator
 			return false;
 		if( type.IsGenericTypeDefinition )
 			return false;
-		//Unfortunately, ITuple does not seem to be available in netstandard2.0, so we have to do string comparison.
+		//Unfortunately, in netstandard2.0 ValueTuple does not implement ITuple, so we have to do string comparison.
 		//return typeof( SysCompiler.ITuple ).IsAssignableFrom( type );
-		return type.FullName != null && type.FullName.StartsWith( "System.ValueTuple`", Sys.StringComparison.Ordinal );
+		if( type.FullName == null )
+			return false;
+		//Note that the following would also match "System.ValueTuple`1[]", but it cannot happen here because arrays
+		//     are not value types, and we have already checked to make sure that this is a value type.
+		return type.FullName.StartsWith( "System.ValueTuple`", Sys.StringComparison.Ordinal );
 	}
 
 	static string? getLanguageKeywordIfBuiltInType( Sys.Type type, bool useLanguageKeywordsForNativeIntegers )
 	{
-		if( type == typeof( object ) )
-			return "object";
-		if( type == typeof( void ) )
-			return "void";
-		if( useLanguageKeywordsForNativeIntegers )
-		{
-			if( type == typeof( nint ) )
-				return "nint";
-			if( type == typeof( nuint ) )
-				return "nuint";
-		}
 		return Sys.Type.GetTypeCode( type ) switch
 		{
 			Sys.TypeCode.SByte => "sbyte",
@@ -199,9 +192,25 @@ public static class CSharpTypeNameGenerator
 			Sys.TypeCode.Double => "double",
 			Sys.TypeCode.Boolean => "bool",
 			Sys.TypeCode.Decimal => "decimal",
-			Sys.TypeCode.Object => null, //typecode is 'object' for everything not in the list.
+			Sys.TypeCode.Object => otherType( type, useLanguageKeywordsForNativeIntegers ),
 			Sys.TypeCode.String => "string",
 			_ => null,
 		};
+
+		static string? otherType( Sys.Type type, bool useLanguageKeywordsForNativeIntegers )
+		{
+			if( type == typeof( object ) )
+				return "object";
+			if( type == typeof( void ) )
+				return "void";
+			if( useLanguageKeywordsForNativeIntegers )
+			{
+				if( type == typeof( nint ) )
+					return "nint";
+				if( type == typeof( nuint ) )
+					return "nuint";
+			}
+			return null;
+		}
 	}
 }
