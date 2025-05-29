@@ -6,14 +6,15 @@
 		<!-- AssemblyName: The default is $(MSBuildProjectName) -->
 		<AssemblyName>$(MSBuildProjectName)-$(Configuration)</AssemblyName>
 
-		<!-- Get version from environment variable, because it is computed by the build server script. -->
-		<Version>$(RELEASE_VERSION)</Version>
+		<!-- _____ Packaging _____ -->
+
 		<!-- PackageId: the default is $(MSBuildProjectName) -->
 		<!--<PackageId>$(AssemblyName)</PackageId>-->
+
 		<!-- Title: the default appears to be $(MSBuildProjectName) if equal to $(AssemblyName), blank otherwise. -->
 		<Title>$(MSBuildProjectName) ($(Configuration))</Title>
 		<Authors>MikeNakis</Authors>
-		<Description>A tiny library that computes the name of any System.Type in human-readable C# notation</Description>
+		<Description>A tiny library that generates the human-readable name of any System.Type in C# notation</Description>
 		<Copyright>Copyright © Mike Nakis. All rights reserved.</Copyright>
 		<PackageIcon>MikeNakis.CSharpTypeNames-Logo.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
@@ -32,10 +33,8 @@
 	<Import Project="..\AllProjects.proj.xml" />
 	<Import Project="..\BannedApiAnalyzers.proj.xml" />
 
-	<!-- NuGet Packaging ******************************************************************************************* -->
-
 	<Target Name="PrepareForPack" BeforeTargets="Pack">
-        <Message Importance="High" Text="Pack: RELEASE_VERSION=$(RELEASE_VERSION)  Version=$(Version)  PackageVersion=$(PackageVersion)"/>		
+        <Error Condition="'$(PackageVersion)' == '1.0.0'" Text="PackageVersion is '1.0.0', which probably means it was not supplied." />		
 	</Target>
 
 	<ItemGroup>
