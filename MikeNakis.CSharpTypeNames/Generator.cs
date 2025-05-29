@@ -18,8 +18,9 @@ public enum Options
 	/// <remarks>For example, <b><c>System.Collections.Generic.Dictionary&lt;TKey,TValue&gt;</c></b> will be generated instead of <b><c>System.Collections.Generic.Dictionary&lt;,&gt;</c></b>.</remarks>
 	UseGenericParameterNames = 1 << 2,
 
-	/// <summary>Specifies that <b><c>nint</c></b> and <b><c>nuint</c></b> should be used instead of <b><c>System.IntPtr</c></b> and <b><c>System.UIntPtr</c></b> respectively.</summary>
-	/// <remarks>Only valid if <see cref="UseLanguageKeywordsForBuiltInTypes" /> is also specified.</remarks>
+	/// <summary>Specifies that language keywords for native integer built-in types should be used.</summary>
+	/// <remarks>For example, <b><c>nint</c></b> will be generated instead of <b><c>System.IntPtr</c></b>.<para/>
+	/// Only valid if <see cref="UseLanguageKeywordsForBuiltInTypes" /> is also specified.</remarks>
 	UseLanguageKeywordsForNativeIntegers = 1 << 3,
 
 	/// <summary>Specifies that namespaces should not be used.</summary>
@@ -31,13 +32,13 @@ public enum Options
 	UseTupleShorthandNotation = 1 << 5,
 }
 
-public static class CSharpTypeNameGenerator
+public static class Generator
 {
 	/// <summary>Generates the human-readable name of a <see cref="Sys.Type"/> using C# notation.</summary>
 	/// <param name="type">The <see cref="Sys.Type"/> whose name is to be generated.</param>
-	/// <param name="options">Specifies how the name will be generated. If omitted, the default is <see cref="Options.None"/>.</param>
+	/// <param name="options">Specifies how the name will be generated.</param>
 	/// <returns>The human-readable name of the given <see cref="Sys.Type"/> in C# notation.</returns>
-	public static string GetCSharpTypeName( Sys.Type type, Options options = Options.None )
+	public static string GetCSharpTypeName( Sys.Type type, Options options )
 	{
 		if( type.IsGenericParameter ) //if a generic parameter is directly passed, always yield its name.
 			return type.Name;
@@ -162,17 +163,19 @@ public static class CSharpTypeNameGenerator
 
 	static bool isValueTuple( Sys.Type type )
 	{
+		// See https://stackoverflow.com/a/75852077/773113
 		if( !type.IsValueType )
 			return false;
 		if( type.IsGenericTypeDefinition )
 			return false;
-		//Unfortunately, in netstandard2.0 ValueTuple does not implement ITuple, so we have to do string comparison.
-		//return typeof( SysCompiler.ITuple ).IsAssignableFrom( type );
+		//In netcore all ValueTuple structs implement ITuple, so they can be easily detected as follows:
+		//    return typeof( SysCompiler.ITuple ).IsAssignableFrom( type );
+		//Unfortunately, in netstandard2.0, ITuple does not seem to exist, so we have to resort to string comparison.
 		if( type.FullName == null )
 			return false;
-		//Note that the following would also match "System.ValueTuple`1[]", but it cannot happen here because arrays
-		//     are not value types, and we have already checked to make sure that this is a value type.
 		return type.FullName.StartsWith( "System.ValueTuple`", Sys.StringComparison.Ordinal );
+		//Note that the above would also match "System.ValueTuple`1[]", but it cannot happen here because arrays
+		//     are not value types, and we have already checked to make sure that this is a value type.
 	}
 
 	static string? getLanguageKeywordIfBuiltInType( Sys.Type type, bool useLanguageKeywordsForNativeIntegers )
