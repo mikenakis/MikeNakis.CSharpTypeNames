@@ -145,6 +145,9 @@ public static class Generator
 							if( argument.IsGenericParameter )
 							{
 								int position = argument.GenericParameterPosition;
+								//if( position >= allGenericArguments.Length )
+								//	SysDiag.Debug.WriteLine( $"type: {typeName} IsGenericTypeDefinition: {type.IsGenericTypeDefinition}; argument: {argument.Name}; GenericParameterPosition: {argument.GenericParameterPosition}; allGenericArguments.Length: {allGenericArguments.Length}" );
+								//else
 								argument = allGenericArguments[position];
 							}
 							recurse( argument );
