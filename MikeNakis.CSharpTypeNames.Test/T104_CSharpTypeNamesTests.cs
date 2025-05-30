@@ -73,41 +73,55 @@ public sealed class T104_CSharpTypeNamesTests
 		test( typeof( Dictionary<int, bool>.Enumerator ) );
 		test( typeof( Dictionary<List<int>, List<bool>>.Enumerator ) );
 
-		test( typeof( C0<int>.C1A ) );
-		test( typeof( C0<int>.C1B<bool, byte> ) );
-		test( typeof( C0<int>.C1B<bool, byte>.C2A ) );
-		test( typeof( C0<int>.C1B<bool, byte>.C2B<char> ) );
+		test( typeof( C0<int, bool>.C1A ) );
+		test( typeof( C0<int, bool>.C1B<byte> ) );
+		test( typeof( C0<int, bool>.C1B<byte>.C2A ) );
+		test( typeof( C0<int, bool>.C1B<byte>.C2A.C3A<char> ) );
+		test( typeof( C0<int, bool>.C1B<byte>.C2B<char> ) );
 
-		test( typeof( C0<>.C1A ) );
-		test( typeof( C0<>.C1B<,> ) );
-		test( typeof( C0<>.C1B<,>.C2A ) );
-		test( typeof( C0<>.C1B<,>.C2B<> ) );
+		test( typeof( C0<,>.C1A ) );
+		test( typeof( C0<,>.C1B<> ) );
+		test( typeof( C0<,>.C1B<>.C2A ) );
+		test( typeof( C0<,>.C1B<>.C2A.C3A<> ) );
+		test( typeof( C0<,>.C1B<>.C2B<> ) );
 
-		test( typeof( C0<> ).GetField( nameof( C0<int>.F1 ) )!.FieldType );
-		test( typeof( C0<>.C1A ).GetField( nameof( C0<int>.C1A.F1 ) )!.FieldType );
-		test( typeof( C0<>.C1B<,> ).GetField( nameof( C0<int>.C1B<int, int>.F1 ) )!.FieldType );
-		test( typeof( C0<>.C1B<,> ).GetField( nameof( C0<int>.C1B<int, int>.F2 ) )!.FieldType );
-		test( typeof( C0<>.C1B<,> ).GetField( nameof( C0<int>.C1B<int, int>.F3 ) )!.FieldType );
-		test( typeof( C0<>.C1B<,>.C2A ).GetField( nameof( C0<int>.C1B<int, int>.C2A.F1 ) )!.FieldType );
-		test( typeof( C0<>.C1B<,>.C2A ).GetField( nameof( C0<int>.C1B<int, int>.C2A.F2 ) )!.FieldType );
-		test( typeof( C0<>.C1B<,>.C2A ).GetField( nameof( C0<int>.C1B<int, int>.C2A.F3 ) )!.FieldType );
-		test( typeof( C0<>.C1B<,>.C2B<> ).GetField( nameof( C0<int>.C1B<int, int>.C2B<int>.F1 ) )!.FieldType );
-		test( typeof( C0<>.C1B<,>.C2B<> ).GetField( nameof( C0<int>.C1B<int, int>.C2B<int>.F2 ) )!.FieldType );
-		test( typeof( C0<>.C1B<,>.C2B<> ).GetField( nameof( C0<int>.C1B<int, int>.C2B<int>.F3 ) )!.FieldType );
-		test( typeof( C0<>.C1B<,>.C2B<> ).GetField( nameof( C0<int>.C1B<int, int>.C2B<int>.F4 ) )!.FieldType );
+		test( typeof( C0<,> ).GetField( nameof( C0<int, bool>.F1 ) )!.FieldType );
+		test( typeof( C0<,> ).GetField( nameof( C0<int, bool>.F2 ) )!.FieldType );
+		test( typeof( C0<,>.C1A ).GetField( nameof( C0<int, bool>.C1A.F1 ) )!.FieldType );
+		test( typeof( C0<,>.C1A ).GetField( nameof( C0<int, bool>.C1A.F2 ) )!.FieldType );
+		test( typeof( C0<,>.C1B<> ).GetField( nameof( C0<int, bool>.C1B<byte>.F1 ) )!.FieldType );
+		test( typeof( C0<,>.C1B<> ).GetField( nameof( C0<int, bool>.C1B<byte>.F2 ) )!.FieldType );
+		test( typeof( C0<,>.C1B<> ).GetField( nameof( C0<int, bool>.C1B<byte>.F3 ) )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2A ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.F1 ) )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2A ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.F2 ) )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2A ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.F3 ) )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2A.C3A<> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.C3A<char>.F1 ) )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2A.C3A<> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.C3A<char>.F2 ) )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2A.C3A<> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.C3A<char>.F3 ) )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2A.C3A<> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.C3A<char>.F4 ) )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2B<> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2B<int>.F1 ) )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2B<> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2B<int>.F2 ) )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2B<> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2B<int>.F3 ) )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2B<> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2B<int>.F4 ) )!.FieldType );
 
-		test( typeof( C0<bool> ).GetField( nameof( C0<int>.F1 ) )!.FieldType );
-		test( typeof( C0<bool>.C1A ).GetField( nameof( C0<int>.C1A.F1 ) )!.FieldType );
-		test( typeof( C0<bool>.C1B<byte, char> ).GetField( nameof( C0<int>.C1B<int, int>.F1 ) )!.FieldType );
-		test( typeof( C0<bool>.C1B<byte, char> ).GetField( nameof( C0<int>.C1B<int, int>.F2 ) )!.FieldType );
-		test( typeof( C0<bool>.C1B<byte, char> ).GetField( nameof( C0<int>.C1B<int, int>.F3 ) )!.FieldType );
-		test( typeof( C0<bool>.C1B<byte, char>.C2A ).GetField( nameof( C0<int>.C1B<int, int>.C2A.F1 ) )!.FieldType );
-		test( typeof( C0<bool>.C1B<byte, char>.C2A ).GetField( nameof( C0<int>.C1B<int, int>.C2A.F2 ) )!.FieldType );
-		test( typeof( C0<bool>.C1B<byte, char>.C2A ).GetField( nameof( C0<int>.C1B<int, int>.C2A.F3 ) )!.FieldType );
-		test( typeof( C0<bool>.C1B<byte, char>.C2B<long> ).GetField( nameof( C0<int>.C1B<int, int>.C2B<int>.F1 ) )!.FieldType );
-		test( typeof( C0<bool>.C1B<byte, char>.C2B<long> ).GetField( nameof( C0<int>.C1B<int, int>.C2B<int>.F2 ) )!.FieldType );
-		test( typeof( C0<bool>.C1B<byte, char>.C2B<long> ).GetField( nameof( C0<int>.C1B<int, int>.C2B<int>.F3 ) )!.FieldType );
-		test( typeof( C0<bool>.C1B<byte, char>.C2B<long> ).GetField( nameof( C0<int>.C1B<int, int>.C2B<int>.F4 ) )!.FieldType );
+		test( typeof( C0<int, bool> ).GetField( nameof( C0<int, bool>.F1 ) )!.FieldType );
+		test( typeof( C0<int, bool> ).GetField( nameof( C0<int, bool>.F2 ) )!.FieldType );
+		test( typeof( C0<int, bool>.C1A ).GetField( nameof( C0<int, bool>.C1A.F1 ) )!.FieldType );
+		test( typeof( C0<int, bool>.C1A ).GetField( nameof( C0<int, bool>.C1A.F2 ) )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte> ).GetField( nameof( C0<int, bool>.C1B<byte>.F1 ) )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte> ).GetField( nameof( C0<int, bool>.C1B<byte>.F2 ) )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte> ).GetField( nameof( C0<int, bool>.C1B<byte>.F3 ) )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2A ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.F1 ) )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2A ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.F2 ) )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2A ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.F3 ) )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2A.C3A<char> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.C3A<char>.F1 ) )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2A.C3A<char> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.C3A<char>.F2 ) )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2A.C3A<char> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.C3A<char>.F3 ) )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2A.C3A<char> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.C3A<char>.F4 ) )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2B<char> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2B<char>.F1 ) )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2B<char> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2B<char>.F2 ) )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2B<char> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2B<char>.F3 ) )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2B<char> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2B<char>.F4 ) )!.FieldType );
 	}
 
 	static void test( Sys.Type type )

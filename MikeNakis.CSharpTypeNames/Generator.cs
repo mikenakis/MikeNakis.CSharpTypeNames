@@ -133,14 +133,14 @@ public static class Generator
 					//    returns a name that is polluted by a back-quote followed by a number.
 					//    So, in order to get the _actual_ name of the type we have no option but to engage in string
 					//    manipulation to extract the part before the back-quote.
-					//PEARL: DotNet does not even offer any proper means of detecting whether a type does or does not
-					//    have generic parameters, so as to know beforehand whether we have to search for a back-quote
-					//    in its name; the only way to know if there is a back-quote in the name is to search for the
-					//    back-quote.
+					//PEARL: DotNet does not even offer any proper means of detecting whether a type has generic
+					//    parameters, so as to know beforehand whether we should expect there to be a back-quote in
+					//    the name.
 					//    The ContainsGenericParameters property, the GenericTypeArguments property, and the
 					//    GetGenericArguments() method all return different results under different circumstances, which
 					//    do not reliably correspond to the presence or absence of a back-quote in the name.
-					//    So, we have no option but to engage in string search to find the back-quote.
+					//    So, the only way to find out if there is a back-quote in the name is to engage in string
+					//    search to find it.
 					int indexOfBackQuote = typeName.LastIndexOf( '`' );
 					SysDiag.Debug.Assert( indexOfBackQuote == typeName.IndexOf( '`' ) );
 					if( indexOfBackQuote != -1 )
