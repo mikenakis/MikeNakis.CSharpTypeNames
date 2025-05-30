@@ -6,30 +6,29 @@ public enum Options
 	/// <summary>Specifies no options.</summary>
 	None = 0,
 
-	/// <summary>Specifies that language keywords for built-in types should be used.</summary>
-	/// <remarks>For example, <b><c>int</c></b> will be generated instead of <b><c>System.Int32</c></b>.</remarks>
-	UseLanguageKeywordsForBuiltInTypes = 1 << 0,
+	/// <summary>Specifies that language keywords for built-in types should not be used.</summary>
+	/// <remarks>For example, <b><c>System.Int32</c></b> will be generated instead of <b><c>int</c></b>.</remarks>
+	NoLanguageKeywordsForBuiltInTypes = 1 << 0,
 
-	/// <summary>Specifies that shorthand notation for nullable value types should be used.</summary>
-	/// <remarks>For example, <b><c>System.DateTime?</c></b> will be generated instead of <b><c>System.Nullable&lt;System.DateTime&gt;</c></b>.</remarks>
-	UseNullableShorthandNotation = 1 << 1,
+	/// <summary>Specifies that shorthand notation for nullable value types should not be used.</summary>
+	/// <remarks>For example, <b><c>System.Nullable&lt;System.DateTime&gt;</c></b> will be generated instead of <b><c>System.DateTime?</c></b>.</remarks>
+	NoNullableShorthandNotation = 1 << 1,
 
 	/// <summary>Specifies that generic parameter names should be used rather than left blank.</summary>
 	/// <remarks>For example, <b><c>System.Collections.Generic.Dictionary&lt;TKey,TValue&gt;</c></b> will be generated instead of <b><c>System.Collections.Generic.Dictionary&lt;,&gt;</c></b>.</remarks>
 	UseGenericParameterNames = 1 << 2,
 
-	/// <summary>Specifies that language keywords for native integer built-in types should be used.</summary>
-	/// <remarks>For example, <b><c>nint</c></b> will be generated instead of <b><c>System.IntPtr</c></b>.<para/>
-	/// Only valid if <see cref="UseLanguageKeywordsForBuiltInTypes" /> is also specified.</remarks>
-	UseLanguageKeywordsForNativeIntegers = 1 << 3,
+	/// <summary>Specifies that language keywords for native integer built-in types should not be used.</summary>
+	/// <remarks>For example, <b><c>System.IntPtr</c></b> will be generated instead of <b><c>nint</c></b>.<para/></remarks>
+	NoLanguageKeywordsForNativeIntegers = 1 << 3,
 
 	/// <summary>Specifies that namespaces should not be used.</summary>
 	/// <remarks>For example, <b><c>DateTime</c></b> will be generated instead of <b><c>System.DateTime</c></b>.</remarks>
-	OmitNamespaces = 1 << 4,
+	NoNamespaces = 1 << 4,
 
-	/// <summary>Specifies that tuple notation should be used for value tuples.</summary>
-	/// <remarks>For example, <b><c>(System.Int32,System.String)</c></b> will be generated instead of <b><c>System.ValueTuple&lt;System.Int32,System.String&gt;</c></b>.</remarks>
-	UseTupleShorthandNotation = 1 << 5,
+	/// <summary>Specifies that tuple notation should not be used.</summary>
+	/// <remarks>For example, <b><c>System.ValueTuple&lt;System.Int32,System.String&gt;</c></b> will be generated instead of <b><c>(System.Int32,System.String)</c></b>.</remarks>
+	NoTupleShorthandNotation = 1 << 5,
 }
 
 public static class Generator
@@ -66,9 +65,9 @@ public static class Generator
 				return;
 			}
 
-			if( options.HasFlag( Options.UseLanguageKeywordsForBuiltInTypes ) )
+			if( !options.HasFlag( Options.NoLanguageKeywordsForBuiltInTypes ) )
 			{
-				string? languageKeyword = getLanguageKeywordIfBuiltInType( type, options.HasFlag( Options.UseLanguageKeywordsForNativeIntegers ) );
+				string? languageKeyword = getLanguageKeywordIfBuiltInType( type, options );
 				if( languageKeyword != null )
 				{
 					stringBuilder.Append( languageKeyword );
@@ -76,7 +75,7 @@ public static class Generator
 				}
 			}
 
-			if( options.HasFlag( Options.UseNullableShorthandNotation ) )
+			if( !options.HasFlag( Options.NoNullableShorthandNotation ) )
 			{
 				var underlyingType = Sys.Nullable.GetUnderlyingType( type );
 				if( underlyingType != null )
@@ -87,7 +86,7 @@ public static class Generator
 				}
 			}
 
-			if( options.HasFlag( Options.UseTupleShorthandNotation ) && isValueTuple( type ) )
+			if( !options.HasFlag( Options.NoTupleShorthandNotation ) && isValueTuple( type ) )
 			{
 				stringBuilder.Append( '(' );
 				var genericArguments = type.GetGenericArguments();
@@ -114,7 +113,7 @@ public static class Generator
 				}
 				else
 				{
-					if( type.Namespace != null && !options.HasFlag( Options.OmitNamespaces ) )
+					if( type.Namespace != null && !options.HasFlag( Options.NoNamespaces ) )
 					{
 						stringBuilder.Append( type.Namespace );
 						stringBuilder.Append( '.' );
@@ -123,13 +122,25 @@ public static class Generator
 
 				string typeName = type.Name;
 
+				// We do this weird thing to emulate the behavior of CSharpCodeProvider, CodeTypeReference
+				if( typeName.StartsWith( "__", Sys.StringComparison.Ordinal ) )
+					stringBuilder.Append( '@' );
+
 				if( type.IsGenericType )
 				{
 					//PEARL: DotNet offers no means of obtaining the plain, unadulterated name of a generic type.
-					//    The only way to get the name of a type seems to be the `Name` property, but this property
-					//    returns a name that is polluted by a back-quote followed by a number, and there is nothing we
-					//    can do about that.
-					//    So, we have no option but to search for the back-quote and extract the part before it.
+					//    The only way to get the name of a type seems to be its `Name` property, but this property
+					//    returns a name that is polluted by a back-quote followed by a number.
+					//    So, in order to get the _actual_ name of the type we have no option but to engage in string
+					//    manipulation to extract the part before the back-quote.
+					//PEARL: DotNet does not even offer any proper means of detecting whether a type does or does not
+					//    have generic parameters, so as to know beforehand whether we have to search for a back-quote
+					//    in its name; the only way to know if there is a back-quote in the name is to search for the
+					//    back-quote.
+					//    The ContainsGenericParameters property, the GenericTypeArguments property, and the
+					//    GetGenericArguments() method all return different results under different circumstances, which
+					//    do not reliably correspond to the presence or absence of a back-quote in the name.
+					//    So, we have no option but to engage in string search to find the back-quote.
 					int indexOfBackQuote = typeName.LastIndexOf( '`' );
 					SysDiag.Debug.Assert( indexOfBackQuote == typeName.IndexOf( '`' ) );
 					if( indexOfBackQuote != -1 )
@@ -145,6 +156,9 @@ public static class Generator
 							if( argument.IsGenericParameter )
 							{
 								int position = argument.GenericParameterPosition;
+								//The following has been observed to happen with what appeared to be a partially
+								//constructed generic type; I am not sure how to fix it, but it is probably not worth
+								//fixing.
 								//if( position >= allGenericArguments.Length )
 								//	SysDiag.Debug.WriteLine( $"type: {typeName} IsGenericTypeDefinition: {type.IsGenericTypeDefinition}; argument: {argument.Name}; GenericParameterPosition: {argument.GenericParameterPosition}; allGenericArguments.Length: {allGenericArguments.Length}" );
 								//else
@@ -181,8 +195,10 @@ public static class Generator
 		//     are not value types, and we have already checked to make sure that this is a value type.
 	}
 
-	static string? getLanguageKeywordIfBuiltInType( Sys.Type type, bool useLanguageKeywordsForNativeIntegers )
+	static string? getLanguageKeywordIfBuiltInType( Sys.Type type, Options options )
 	{
+		if( type.IsEnum )
+			return null;
 		return Sys.Type.GetTypeCode( type ) switch
 		{
 			Sys.TypeCode.SByte => "sbyte",
@@ -198,18 +214,18 @@ public static class Generator
 			Sys.TypeCode.Double => "double",
 			Sys.TypeCode.Boolean => "bool",
 			Sys.TypeCode.Decimal => "decimal",
-			Sys.TypeCode.Object => otherType( type, useLanguageKeywordsForNativeIntegers ),
+			Sys.TypeCode.Object => otherType( type, options ),
 			Sys.TypeCode.String => "string",
 			_ => null,
 		};
 
-		static string? otherType( Sys.Type type, bool useLanguageKeywordsForNativeIntegers )
+		static string? otherType( Sys.Type type, Options options )
 		{
 			if( type == typeof( object ) )
 				return "object";
 			if( type == typeof( void ) )
 				return "void";
-			if( useLanguageKeywordsForNativeIntegers )
+			if( !options.HasFlag( Options.NoLanguageKeywordsForNativeIntegers ) )
 			{
 				if( type == typeof( nint ) )
 					return "nint";
