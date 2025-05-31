@@ -77,7 +77,7 @@ public static class Generator
 
 			if( !options.HasFlag( Options.NoNullableShorthandNotation ) )
 			{
-				var underlyingType = Sys.Nullable.GetUnderlyingType( type );
+				Sys.Type underlyingType = Sys.Nullable.GetUnderlyingType( type );
 				if( underlyingType != null )
 				{
 					recurse( underlyingType );
@@ -89,7 +89,7 @@ public static class Generator
 			if( !options.HasFlag( Options.NoTupleShorthandNotation ) && isValueTuple( type ) )
 			{
 				stringBuilder.Append( '(' );
-				var genericArguments = type.GetGenericArguments();
+				Sys.Type[] genericArguments = type.GetGenericArguments();
 				for( int i = 0; i < genericArguments.Length; i++ )
 				{
 					recurse( genericArguments[i] );

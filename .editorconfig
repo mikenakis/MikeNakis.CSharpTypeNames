@@ -170,6 +170,14 @@ spelling_error_severity = information
 
 # IDE0055: "Formatting rule"
 #          a.k.a. "Fix formatting"
+# IDE0055: "Formatting rule"
+# PEARL: This rule _*must*_ be configured in .editorconfig, not in .globalconfig.
+#        To be fair, the documentation states that .globalconfig is for code analysis rules, not for formatting rules.
+#        However, this limitation appears to have been introduced in order to cover up for bugs:
+#        If you specify IDE0055 in .globalconfig instead of .editorconfig, the built-in formatter of Visual Studio will
+#        continue to work fine, and the "Format Code" option of the "Code Cleanup" command of Visual Studio will also
+#        continue to work fine, but `dotnet format` (and `dotnet format whitespace`) will completely mess up your code
+#        by applying all default formatting to it, because apparently it is unaware of .globalconfig.
 # PEARL: These are all the meager few formatting options supported by Microsoft. This is a joke.
 dotnet_diagnostic.IDE0055.severity = warning
 
@@ -332,5 +340,6 @@ build_check.BC0201.severity=warning
 # BC0202: "A property should be declared before it is first used."
 build_check.BC0202.severity=warning
 
-# BC0203: "A property that is not used should not be declared" aka "Property: '<a>' was declared/initialized, but it was never used."
-build_check.BC0203.severity=warning
+# BC0203: " Property declared but never used." a.k.a. "A property that is not used should not be declared" a.k.a. "Property: '<a>' was declared/initialized, but it was never used."
+build_check.BC0203.severity=none
+# Justification: the documentation page says "it can have false positives - for this reasons[sic] it's currently not enabled by defaut."
