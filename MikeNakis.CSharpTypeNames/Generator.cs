@@ -100,9 +100,16 @@ public static class Generator
 				return;
 			}
 
-			Sys.Type[] allGenericArguments = type.GetGenericArguments();
+			Sys.Type[] allGenericArguments = getAllGenericArguments( type );
 			recurseNested( type, allGenericArguments );
 			return;
+
+			static Sys.Type[] getAllGenericArguments( Sys.Type type )
+			{
+				//if( type.IsNested )
+				//	return getAllGenericArguments( type.DeclaringType );
+				return type.GetGenericArguments();
+			}
 
 			void recurseNested( Sys.Type type, Sys.Type[] allGenericArguments )
 			{
@@ -134,13 +141,12 @@ public static class Generator
 					//    So, in order to get the _actual_ name of the type we have no option but to engage in string
 					//    manipulation to extract the part before the back-quote.
 					//PEARL: DotNet does not even offer any proper means of detecting whether a type has generic
-					//    parameters, so as to know beforehand whether we should expect there to be a back-quote in
-					//    the name.
+					//    parameters, so as to know beforehand whether we should expect a back-quote in the name.
 					//    The ContainsGenericParameters property, the GenericTypeArguments property, and the
 					//    GetGenericArguments() method all return different results under different circumstances, which
 					//    do not reliably correspond to the presence or absence of a back-quote in the name.
 					//    So, the only way to find out if there is a back-quote in the name is to engage in string
-					//    search to find it.
+					//    search to try and find it.
 					int indexOfBackQuote = typeName.LastIndexOf( '`' );
 					SysDiag.Debug.Assert( indexOfBackQuote == typeName.IndexOf( '`' ) );
 					if( indexOfBackQuote != -1 )
@@ -152,19 +158,16 @@ public static class Generator
 						SysDiag.Debug.Assert( arguments.Length - start == int.Parse( typeName.Substring( indexOfBackQuote + 1 ), SysGlob.CultureInfo.InvariantCulture ) );
 						for( int i = start; i < arguments.Length; i++ )
 						{
-							Sys.Type argument = arguments[i];
-							if( argument.IsGenericParameter )
+							if( !(type.ContainsGenericParameters && !type.IsGenericTypeDefinition) ) // very special case for the type of the field in `TypeA<T1,T2> { TypeB<T2> Field; }`
 							{
-								int position = argument.GenericParameterPosition;
-								//The following has been observed to happen with what appeared to be a partially
-								//constructed generic type; I am not sure how to fix it, but it is probably not worth
-								//fixing.
-								//if( position >= allGenericArguments.Length )
-								//	SysDiag.Debug.WriteLine( $"type: {typeName} IsGenericTypeDefinition: {type.IsGenericTypeDefinition}; argument: {argument.Name}; GenericParameterPosition: {argument.GenericParameterPosition}; allGenericArguments.Length: {allGenericArguments.Length}" );
-								//else
-								argument = allGenericArguments[position];
+								Sys.Type argument = arguments[i];
+								if( argument.IsGenericParameter )
+								{
+									int position = argument.GenericParameterPosition;
+									argument = allGenericArguments[position];
+								}
+								recurse( argument );
 							}
-							recurse( argument );
 							if( i + 1 < arguments.Length )
 								stringBuilder.Append( ',' );
 						}

@@ -1,7 +1,10 @@
 namespace MikeNakis.CSharpTypeNames.Test;
 
+using System.Linq;
 using MikeNakis.CSharpTypeNames.Extensions;
+using MikeNakis.Kit.Extensions;
 using static System.Reflection.Metadata.PEReaderExtensions;
+using static MikeNakis.Kit.GlobalStatics;
 using CodeDom = Sys.CodeDom;
 using CSharp = Microsoft.CSharp;
 using SysReflectMetadata = SysReflect.Metadata;
@@ -11,8 +14,102 @@ using VSTesting = Microsoft.VisualStudio.TestTools.UnitTesting;
 [VSTesting.TestClass]
 public sealed class T104_CSharpTypeNamesTests
 {
+	record struct Designator( bool IsConstructed, bool ContainsParameters, bool IsDefinition )
+	{
+		public static Designator Of( Sys.Type type ) => new Designator( type.IsConstructedGenericType, type.ContainsGenericParameters, type.IsGenericTypeDefinition );
+
+		public static readonly Designator OfNonGenericType = new Designator( false, false, false );
+		public static readonly Designator OfGenericType = new Designator( true, false, false );
+		public static readonly Designator OfGenericTypeDefinition = new Designator( false, true, true );
+		public static readonly Designator OfGenericArgument = new Designator( false, true, false );
+	}
+
 	[VSTesting.TestMethod]
-	public void Test()
+	public void T101_Studying_Non_Generic_Types()
+	{
+		Sys.Type type = typeof( string );
+		Assert( type.IsGenericType == false );
+		Assert( Designator.Of( type ) == Designator.OfNonGenericType );
+		Assert( type.GenericTypeArguments.Length == 0 );
+		Assert( type.GetGenericArguments().Length == 0 );
+		Assert( TryCatch( () => type.GetGenericTypeDefinition() ) is Sys.InvalidOperationException );
+	}
+
+	[VSTesting.TestMethod]
+	public void T102_Studying_Generic_Types()
+	{
+		Sys.Type type = typeof( IEnumerable<string> );
+		Assert( type.IsGenericType == true );
+		Assert( Designator.Of( type ) == Designator.OfGenericType );
+		Assert( type.GenericTypeArguments.Length == 1 );
+		Assert( type.GenericTypeArguments[0] == typeof( string ) );
+		Assert( type.GenericTypeArguments.SequenceEqual( type.GetGenericArguments() ) );
+		Assert( type.GetGenericTypeDefinition().ReferenceEquals( typeof( IEnumerable<> ) ) );
+	}
+
+	[VSTesting.TestMethod]
+	public void T103_Studying_Generic_Type_Definitions()
+	{
+		Sys.Type type = typeof( IEnumerable<> );
+		Assert( type.IsGenericType == true );
+		Assert( Designator.Of( type ) == Designator.OfGenericTypeDefinition );
+		Assert( type.GenericTypeArguments.Length == 0 );
+		Assert( type.GetGenericArguments().Length == 1 );
+		Assert( type.GetGenericTypeDefinition().ReferenceEquals( type ) );
+
+		Sys.Type argumentType = type.GetGenericArguments()[0];
+		Assert( argumentType.IsGenericType == false );
+		Assert( Designator.Of( argumentType ) == Designator.OfGenericArgument );
+		Assert( argumentType.IsGenericParameter == true );
+		Assert( argumentType.IsGenericTypeParameter == true );
+		Assert( argumentType.IsGenericMethodParameter == false );
+		Assert( argumentType.Name == "T" );
+		Assert( argumentType.FullName == null );
+		Assert( argumentType.GenericParameterPosition == 0 );
+	}
+
+	public class Type1<T, U>
+	{
+		public const string FieldName = nameof( F );
+#pragma warning disable CA1051 // Do not declare visible instance fields
+		public ICollection<U>? F;
+#pragma warning restore CA1051 // Do not declare visible instance fields
+	}
+
+	[VSTesting.TestMethod]
+	public void T104_Studying_Nested_Generic_Type_Definitions()
+	{
+		Sys.Type type = typeof( Type1<,> ).GetField( Type1<int, int>.FieldName )!.FieldType;
+		Assert( type.IsGenericType == true );
+		Assert( Designator.Of( type ) == new Designator( true, true, false ) ); // !!!
+		Assert( type.GenericTypeArguments.Length == 1 );
+		Assert( type.GetGenericArguments().Length == 1 );
+		Assert( type.GenericTypeArguments.SequenceEqual( type.GetGenericArguments() ) );
+
+		Sys.Type genericTypeDefinition = type.GetGenericTypeDefinition();
+		Assert( genericTypeDefinition.IsGenericType == true );
+		Assert( Designator.Of( genericTypeDefinition ) == Designator.OfGenericTypeDefinition );
+		Assert( genericTypeDefinition.GenericTypeArguments.Length == 0 );
+		Assert( genericTypeDefinition.GetGenericArguments().Length == 1 );
+		Assert( genericTypeDefinition.IsNested == false );
+
+		Sys.Type argumentType = type.GetGenericArguments()[0];
+		Assert( argumentType.IsGenericType == false );
+		Assert( Designator.Of( argumentType ) == Designator.OfGenericArgument );
+		Assert( argumentType.IsGenericParameter == true );
+		Assert( argumentType.IsGenericTypeParameter == true );
+		Assert( argumentType.IsGenericMethodParameter == false );
+		Assert( argumentType.Name == "U" );
+		Assert( argumentType.FullName == null );
+		Assert( argumentType.GenericParameterPosition == 1 );
+
+		test( type );
+	}
+
+	public class T { };
+
+	[VSTesting.TestMethod]
+	public void T201_Works_As_Expected_On_Various_Types()
 	{
 		test( typeof( sbyte ) );
 		test( typeof( byte ) );
@@ -47,31 +144,27 @@ public sealed class T104_CSharpTypeNamesTests
 		test( typeof( int?[,,] ) );
 		test( typeof( int?[][] ) );
 
-		test( typeof( List<> ) );
 		test( typeof( List<int> ) );
-		test( typeof( List<int[,]> ) );
-		test( typeof( List<int[][]> ) );
+		test( typeof( List<int[]> ) );
 		test( typeof( List<int?> ) );
-		test( typeof( List<int?[,]> ) );
-		test( typeof( List<int?[][]> ) );
+		test( typeof( List<int?[]> ) );
 		test( typeof( List<int>[] ) );
-		test( typeof( List<int>[,] ) );
-		test( typeof( List<int>[][] ) );
+		test( typeof( List<int?>[] ) );
 		test( typeof( List<List<int>> ) );
-		test( typeof( List<List<int[,]>> ) );
-		test( typeof( List<List<int[][]>> ) );
-		test( typeof( List<List<int?>> ) );
-		test( typeof( List<List<int?[,]>> ) );
-		test( typeof( List<List<int?[][]>> ) );
-		test( typeof( Dictionary<,> ) );
-		test( typeof( Dictionary<int, bool> ) );
-		test( typeof( Dictionary<List<int>, List<bool>> ) );
+
+		test( typeof( List<> ) );
 		test( typeof( List<>.Enumerator ) );
+		test( typeof( Dictionary<,> ) );
+		test( typeof( Dictionary<,>.Enumerator ) );
+		test( typeof( Dictionary<,>.KeyCollection ) );
+
 		test( typeof( List<int>.Enumerator ) );
 		test( typeof( List<List<int>>.Enumerator ) );
-		test( typeof( Dictionary<,>.Enumerator ) );
+		test( typeof( Dictionary<int, bool> ) );
+		test( typeof( Dictionary<List<int>, List<bool>> ) );
 		test( typeof( Dictionary<int, bool>.Enumerator ) );
 		test( typeof( Dictionary<List<int>, List<bool>>.Enumerator ) );
+		test( typeof( Dictionary<int, int>.KeyCollection ) );
 
 		test( typeof( C0<int, bool>.C1A ) );
 		test( typeof( C0<int, bool>.C1B<byte> ) );
@@ -85,43 +178,47 @@ public sealed class T104_CSharpTypeNamesTests
 		test( typeof( C0<,>.C1B<>.C2A.C3A<> ) );
 		test( typeof( C0<,>.C1B<>.C2B<> ) );
 
-		test( typeof( C0<,> ).GetField( nameof( C0<int, bool>.F1 ) )!.FieldType );
-		test( typeof( C0<,> ).GetField( nameof( C0<int, bool>.F2 ) )!.FieldType );
-		test( typeof( C0<,>.C1A ).GetField( nameof( C0<int, bool>.C1A.F1 ) )!.FieldType );
-		test( typeof( C0<,>.C1A ).GetField( nameof( C0<int, bool>.C1A.F2 ) )!.FieldType );
-		test( typeof( C0<,>.C1B<> ).GetField( nameof( C0<int, bool>.C1B<byte>.F1 ) )!.FieldType );
-		test( typeof( C0<,>.C1B<> ).GetField( nameof( C0<int, bool>.C1B<byte>.F2 ) )!.FieldType );
-		test( typeof( C0<,>.C1B<> ).GetField( nameof( C0<int, bool>.C1B<byte>.F3 ) )!.FieldType );
-		test( typeof( C0<,>.C1B<>.C2A ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.F1 ) )!.FieldType );
-		test( typeof( C0<,>.C1B<>.C2A ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.F2 ) )!.FieldType );
-		test( typeof( C0<,>.C1B<>.C2A ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.F3 ) )!.FieldType );
-		test( typeof( C0<,>.C1B<>.C2A.C3A<> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.C3A<char>.F1 ) )!.FieldType );
-		test( typeof( C0<,>.C1B<>.C2A.C3A<> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.C3A<char>.F2 ) )!.FieldType );
-		test( typeof( C0<,>.C1B<>.C2A.C3A<> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.C3A<char>.F3 ) )!.FieldType );
-		test( typeof( C0<,>.C1B<>.C2A.C3A<> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.C3A<char>.F4 ) )!.FieldType );
-		test( typeof( C0<,>.C1B<>.C2B<> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2B<int>.F1 ) )!.FieldType );
-		test( typeof( C0<,>.C1B<>.C2B<> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2B<int>.F2 ) )!.FieldType );
-		test( typeof( C0<,>.C1B<>.C2B<> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2B<int>.F3 ) )!.FieldType );
-		test( typeof( C0<,>.C1B<>.C2B<> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2B<int>.F4 ) )!.FieldType );
+		test( typeof( C0<,> ).GetField( C0<T, T>.F1Name )!.FieldType );
+		test( typeof( C0<,> ).GetField( C0<T, T>.F2Name )!.FieldType );
+		test( typeof( C0<,> ).GetField( C0<T, T>.F2cName )!.FieldType );
+		test( typeof( C0<,>.C1A ).GetField( C0<T, T>.C1A.F1Name )!.FieldType );
+		test( typeof( C0<,>.C1A ).GetField( C0<T, T>.C1A.F2Name )!.FieldType );
+		test( typeof( C0<,>.C1A ).GetField( C0<T, T>.C1A.F2cName )!.FieldType );
+		test( typeof( C0<,>.C1B<> ).GetField( C0<T, T>.C1B<T>.F1Name )!.FieldType );
+		test( typeof( C0<,>.C1B<> ).GetField( C0<T, T>.C1B<T>.F2Name )!.FieldType );
+		test( typeof( C0<,>.C1B<> ).GetField( C0<T, T>.C1B<T>.F3Name )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2A ).GetField( C0<T, T>.C1B<T>.C2A.F1Name )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2A ).GetField( C0<T, T>.C1B<T>.C2A.F2Name )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2A ).GetField( C0<T, T>.C1B<T>.C2A.F3Name )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2A.C3A<> ).GetField( C0<T, T>.C1B<T>.C2A.C3A<T>.F1Name )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2A.C3A<> ).GetField( C0<T, T>.C1B<T>.C2A.C3A<T>.F2Name )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2A.C3A<> ).GetField( C0<T, T>.C1B<T>.C2A.C3A<T>.F3Name )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2A.C3A<> ).GetField( C0<T, T>.C1B<T>.C2A.C3A<T>.F4Name )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2B<> ).GetField( C0<T, T>.C1B<T>.C2B<int>.F1Name )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2B<> ).GetField( C0<T, T>.C1B<T>.C2B<int>.F2Name )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2B<> ).GetField( C0<T, T>.C1B<T>.C2B<int>.F3Name )!.FieldType );
+		test( typeof( C0<,>.C1B<>.C2B<> ).GetField( C0<T, T>.C1B<T>.C2B<int>.F4Name )!.FieldType );
 
-		test( typeof( C0<int, bool> ).GetField( nameof( C0<int, bool>.F1 ) )!.FieldType );
-		test( typeof( C0<int, bool> ).GetField( nameof( C0<int, bool>.F2 ) )!.FieldType );
-		test( typeof( C0<int, bool>.C1A ).GetField( nameof( C0<int, bool>.C1A.F1 ) )!.FieldType );
-		test( typeof( C0<int, bool>.C1A ).GetField( nameof( C0<int, bool>.C1A.F2 ) )!.FieldType );
-		test( typeof( C0<int, bool>.C1B<byte> ).GetField( nameof( C0<int, bool>.C1B<byte>.F1 ) )!.FieldType );
-		test( typeof( C0<int, bool>.C1B<byte> ).GetField( nameof( C0<int, bool>.C1B<byte>.F2 ) )!.FieldType );
-		test( typeof( C0<int, bool>.C1B<byte> ).GetField( nameof( C0<int, bool>.C1B<byte>.F3 ) )!.FieldType );
-		test( typeof( C0<int, bool>.C1B<byte>.C2A ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.F1 ) )!.FieldType );
-		test( typeof( C0<int, bool>.C1B<byte>.C2A ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.F2 ) )!.FieldType );
-		test( typeof( C0<int, bool>.C1B<byte>.C2A ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.F3 ) )!.FieldType );
-		test( typeof( C0<int, bool>.C1B<byte>.C2A.C3A<char> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.C3A<char>.F1 ) )!.FieldType );
-		test( typeof( C0<int, bool>.C1B<byte>.C2A.C3A<char> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.C3A<char>.F2 ) )!.FieldType );
-		test( typeof( C0<int, bool>.C1B<byte>.C2A.C3A<char> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.C3A<char>.F3 ) )!.FieldType );
-		test( typeof( C0<int, bool>.C1B<byte>.C2A.C3A<char> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2A.C3A<char>.F4 ) )!.FieldType );
-		test( typeof( C0<int, bool>.C1B<byte>.C2B<char> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2B<char>.F1 ) )!.FieldType );
-		test( typeof( C0<int, bool>.C1B<byte>.C2B<char> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2B<char>.F2 ) )!.FieldType );
-		test( typeof( C0<int, bool>.C1B<byte>.C2B<char> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2B<char>.F3 ) )!.FieldType );
-		test( typeof( C0<int, bool>.C1B<byte>.C2B<char> ).GetField( nameof( C0<int, bool>.C1B<byte>.C2B<char>.F4 ) )!.FieldType );
+		test( typeof( C0<int, bool> ).GetField( C0<T, T>.F1Name )!.FieldType );
+		test( typeof( C0<int, bool> ).GetField( C0<T, T>.F2Name )!.FieldType );
+		test( typeof( C0<int, bool> ).GetField( C0<T, T>.F2cName )!.FieldType );
+		test( typeof( C0<int, bool>.C1A ).GetField( C0<T, T>.C1A.F1Name )!.FieldType );
+		test( typeof( C0<int, bool>.C1A ).GetField( C0<T, T>.C1A.F2Name )!.FieldType );
+		test( typeof( C0<int, bool>.C1A ).GetField( C0<T, T>.C1A.F2cName )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte> ).GetField( C0<T, T>.C1B<T>.F1Name )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte> ).GetField( C0<T, T>.C1B<T>.F2Name )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte> ).GetField( C0<T, T>.C1B<T>.F3Name )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2A ).GetField( C0<T, T>.C1B<T>.C2A.F1Name )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2A ).GetField( C0<T, T>.C1B<T>.C2A.F2Name )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2A ).GetField( C0<T, T>.C1B<T>.C2A.F3Name )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2A.C3A<char> ).GetField( C0<T, T>.C1B<T>.C2A.C3A<T>.F1Name )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2A.C3A<char> ).GetField( C0<T, T>.C1B<T>.C2A.C3A<T>.F2Name )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2A.C3A<char> ).GetField( C0<T, T>.C1B<T>.C2A.C3A<T>.F3Name )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2A.C3A<char> ).GetField( C0<T, T>.C1B<T>.C2A.C3A<T>.F4Name )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2B<char> ).GetField( C0<T, T>.C1B<T>.C2B<T>.F1Name )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2B<char> ).GetField( C0<T, T>.C1B<T>.C2B<T>.F2Name )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2B<char> ).GetField( C0<T, T>.C1B<T>.C2B<T>.F3Name )!.FieldType );
+		test( typeof( C0<int, bool>.C1B<byte>.C2B<char> ).GetField( C0<T, T>.C1B<T>.C2B<T>.F4Name )!.FieldType );
 	}
 
 	static void test( Sys.Type type )
@@ -158,30 +255,35 @@ public sealed class T104_CSharpTypeNamesTests
 	}
 
 	[VSTesting.TestMethod]
-	public void All_DotNet_SDK_Types()
+	public void T202_Works_As_Expected_On_All_DotNet_SDK_Types()
 	{
 		string dotNetSdkDirectoryPath = getDotNetSdkDirectoryPath();
-		List<(SysReflect.Assembly, Sys.Type[])> assembliesAndTypes = new();
+		List<(SysReflect.Assembly, IReadOnlyList<Sys.Type>)> assembliesAndTypes = new();
 		foreach( string filePath in enumerateFiles( dotNetSdkDirectoryPath, "*.dll" ) )
 		{
 			SysReflect.Assembly? assembly = tryLoadAssemblyFrom( filePath );
 			if( assembly == null )
 				continue;
-			Sys.Type[] types = assembly.GetTypes();
-			if( types.Length == 0 )
+			IReadOnlyList<Sys.Type> types = assembly.GetTypes().SelectMany( getNestedTypes ).ToArray();
+			if( types.Count == 0 )
 				continue;
 			assembliesAndTypes.Add( (assembly, types) );
 		}
-		int typeCount = assembliesAndTypes.Select( tuple => tuple.Item2.Length ).Sum();
+		int typeCount = assembliesAndTypes.Select( tuple => tuple.Item2.Count ).Sum();
 		Sys.Console.WriteLine( $"Generating type names for all {typeCount} types in all {assembliesAndTypes.Count} assemblies of the DotNet SDK..." );
 		Sys.Console.WriteLine( "" );
-		foreach( (SysReflect.Assembly assembly, Sys.Type[] types) in assembliesAndTypes )
+		foreach( (SysReflect.Assembly assembly, IReadOnlyList<Sys.Type> types) in assembliesAndTypes )
 		{
-			Sys.Console.WriteLine( $"Generating type names for {types.Length} types in assembly {assembly.GetName().Name}..." );
+			Sys.Console.WriteLine( $"Generating type names for {types.Count} types in assembly {assembly.GetName().Name}..." );
 			Sys.Console.Out.Flush();
 			foreach( var type in types )
 				test( type );
 		}
+	}
+
+	static IEnumerable<Sys.Type> getNestedTypes( Sys.Type type )
+	{
+		return new Sys.Type[] { type }.Concat( type.GetNestedTypes().SelectMany( getNestedTypes ) );
 	}
 
 	static IEnumerable<string> enumerateFiles( string directoryPath, string pattern )
