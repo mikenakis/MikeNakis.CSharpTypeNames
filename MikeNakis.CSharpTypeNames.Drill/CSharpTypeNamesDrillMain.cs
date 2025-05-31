@@ -232,23 +232,4 @@ sealed class CSharpTypeNamesDrillMain
 			}
 		}
 	}
-
-	internal static Sys.TimeSpan Benchmark( int count, Sys.Action procedure )
-	{
-		Sys.TimeSpan fastestTime = Sys.TimeSpan.MaxValue;
-		for( int i = 0; i < count; i++ )
-		{
-			Sys.TimeSpan time = measure( procedure );
-			if( time < fastestTime )
-				fastestTime = time;
-		}
-		return fastestTime;
-
-		static Sys.TimeSpan measure( Sys.Action procedure )
-		{
-			long start = SysDiag.Stopwatch.GetTimestamp();
-			procedure.Invoke();
-			return SysDiag.Stopwatch.GetElapsedTime( start );
-		}
-	}
 }
