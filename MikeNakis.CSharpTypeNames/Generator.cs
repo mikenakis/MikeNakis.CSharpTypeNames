@@ -14,9 +14,9 @@ public enum Options
 	/// <remarks>For example, <b><c>System.Nullable&lt;System.DateTime&gt;</c></b> will be generated instead of <b><c>System.DateTime?</c></b>.</remarks>
 	NoNullableShorthandNotation = 1 << 1,
 
-	/// <summary>Specifies that generic parameter names should be used rather than left blank.</summary>
+	/// <summary>Specifies that generic parameter names should be emitted rather than left blank.</summary>
 	/// <remarks>For example, <b><c>System.Collections.Generic.Dictionary&lt;TKey,TValue&gt;</c></b> will be generated instead of <b><c>System.Collections.Generic.Dictionary&lt;,&gt;</c></b>.</remarks>
-	UseGenericParameterNames = 1 << 2,
+	EmitGenericParameterNames = 1 << 2,
 
 	/// <summary>Specifies that language keywords for native integer built-in types should not be used.</summary>
 	/// <remarks>For example, <b><c>System.IntPtr</c></b> will be generated instead of <b><c>nint</c></b>.<para/></remarks>
@@ -29,6 +29,10 @@ public enum Options
 	/// <summary>Specifies that tuple notation should not be used.</summary>
 	/// <remarks>For example, <b><c>System.ValueTuple&lt;System.Int32,System.String&gt;</c></b> will be generated instead of <b><c>(System.Int32,System.String)</c></b>.</remarks>
 	NoTupleShorthandNotation = 1 << 5,
+
+	/// <summary>Specifies that the keyword of the type should be generated.</summary>
+	/// <remarks>For example, <b><c>interface IDisposable</c></b> will be generated instead of <b><c>IDisposable</c></b>.</remarks>
+	EmitTypeKeyword = 1 << 6,
 }
 
 public static class Generator
@@ -39,17 +43,43 @@ public static class Generator
 	/// <returns>The human-readable name of the given <see cref="Sys.Type"/> in C# notation.</returns>
 	public static string GetCSharpTypeName( Sys.Type type, Options options )
 	{
-		if( type.IsGenericParameter ) //if a generic parameter is directly passed, always yield its name.
-			return type.Name;
 		SysText.StringBuilder stringBuilder = new();
-		recurse( type );
+		if( options.HasFlag( Options.EmitTypeKeyword ) )
+		{
+			if( type.IsGenericTypeDefinition )
+				stringBuilder.Append( "generic " );
+			if( type.IsGenericParameter )
+				stringBuilder.Append( "generic type parameter " );
+			else if( type.IsPointer )
+				stringBuilder.Append( "pointer " );
+			else if( typeof( Sys.Delegate ).IsAssignableFrom( type ) )
+				stringBuilder.Append( "delegate " );
+			else if( type.IsInterface )
+				stringBuilder.Append( "interface " );
+			else if( type.IsEnum )
+				stringBuilder.Append( "enum " );
+			else if( type.IsValueType )
+				stringBuilder.Append( "struct " );
+			else if( type.IsArray )
+				stringBuilder.Append( "array " );
+			else if( type.IsClass )
+				stringBuilder.Append( "class " );
+			else
+				SysDiag.Debug.Assert( false );
+			if( type.IsGenericTypeDefinition )
+				stringBuilder.Append( "definition " );
+		}
+		if( type.IsGenericParameter ) //if a generic parameter is directly passed, always yield its name.
+			stringBuilder.Append( type.Name );
+		else
+			recurse( type );
 		return stringBuilder.ToString();
 
 		void recurse( Sys.Type type )
 		{
 			if( type.IsGenericParameter )
 			{
-				if( options.HasFlag( Options.UseGenericParameterNames ) )
+				if( options.HasFlag( Options.EmitGenericParameterNames ) )
 					stringBuilder.Append( type.Name );
 				return;
 			}
