@@ -44,8 +44,7 @@ public static class Generator
 	public static string GetCSharpTypeName( Sys.Type type, Options options )
 	{
 		SysText.StringBuilder stringBuilder = new();
-		if( options.HasFlag( Options.EmitTypeKeyword ) )
-			emitTypeKeyword( type );
+		emitTypeKeyword( type, options );
 
 		if( type.IsGenericParameter ) //if a generic parameter is directly passed, always yield its name.
 			stringBuilder.Append( type.Name );
@@ -54,8 +53,13 @@ public static class Generator
 
 		return stringBuilder.ToString();
 
-		void emitTypeKeyword( Sys.Type type )
+		void emitTypeKeyword( Sys.Type type, Options options )
 		{
+			if( !options.HasFlag( Options.EmitTypeKeyword ) )
+				return;
+			if( getLanguageKeywordIfBuiltInType( type, options ) != null )
+				return;
+
 			if( type.IsGenericTypeDefinition )
 				stringBuilder.Append( "generic " );
 
