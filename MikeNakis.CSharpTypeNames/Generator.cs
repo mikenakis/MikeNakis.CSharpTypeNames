@@ -45,35 +45,46 @@ public static class Generator
 	{
 		SysText.StringBuilder stringBuilder = new();
 		if( options.HasFlag( Options.EmitTypeKeyword ) )
+			emitTypeKeyword( type );
+
+		if( type.IsGenericParameter ) //if a generic parameter is directly passed, always yield its name.
+			stringBuilder.Append( type.Name );
+		else
+			recurse( type );
+
+		return stringBuilder.ToString();
+
+		void emitTypeKeyword( Sys.Type type )
 		{
 			if( type.IsGenericTypeDefinition )
 				stringBuilder.Append( "generic " );
+
 			if( type.IsGenericParameter )
 				stringBuilder.Append( "generic type parameter " );
 			else if( type.IsPointer )
 				stringBuilder.Append( "pointer " );
 			else if( typeof( Sys.Delegate ).IsAssignableFrom( type ) )
 				stringBuilder.Append( "delegate " );
-			else if( type.IsInterface )
-				stringBuilder.Append( "interface " );
 			else if( type.IsEnum )
 				stringBuilder.Append( "enum " );
-			else if( type.IsValueType )
-				stringBuilder.Append( "struct " );
 			else if( type.IsArray )
 				stringBuilder.Append( "array " );
+
+			else if( type.IsInterface )
+				stringBuilder.Append( "interface " );
+			else if( type.IsValueType )
+			{
+				if( !isValueTuple( type ) )
+					stringBuilder.Append( "struct " );
+			}
 			else if( type.IsClass )
 				stringBuilder.Append( "class " );
 			else
 				SysDiag.Debug.Assert( false );
+
 			if( type.IsGenericTypeDefinition )
 				stringBuilder.Append( "definition " );
 		}
-		if( type.IsGenericParameter ) //if a generic parameter is directly passed, always yield its name.
-			stringBuilder.Append( type.Name );
-		else
-			recurse( type );
-		return stringBuilder.ToString();
 
 		void recurse( Sys.Type type )
 		{
