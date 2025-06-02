@@ -149,7 +149,7 @@ sealed class CSharpTypeNamesDrillMain
 
 	static void test( Sys.Type type, bool consoleOutput )
 	{
-		string generatedTypeName = type.GetCSharpName( Options.NoNullableShorthandNotation | Options.NoLanguageKeywordsForNativeIntegers | Options.NoTupleShorthandNotation );
+		string generatedTypeName = type.GetCSharpName( Options.NoNullableShorthandNotation | Options.NoKeywordsForNativeSizedIntegers | Options.NoTupleShorthandNotation );
 		string expectedTypeName = getTypeNameFromCSharpCompiler( type );
 		bool failure = generatedTypeName != expectedTypeName;
 		if( consoleOutput || failure )

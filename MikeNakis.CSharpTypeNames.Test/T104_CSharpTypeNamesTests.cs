@@ -125,7 +125,7 @@ public sealed class T104_CSharpTypeNamesTests
 
 	static void test( Sys.Type type )
 	{
-		string generatedTypeName = type.GetCSharpName( Options.NoNullableShorthandNotation | Options.NoLanguageKeywordsForNativeIntegers | Options.NoTupleShorthandNotation );
+		string generatedTypeName = type.GetCSharpName( Options.NoNullableShorthandNotation | Options.NoKeywordsForNativeSizedIntegers | Options.NoTupleShorthandNotation );
 		Sys.Console.WriteLine( $"    {generatedTypeName}" );
 		string expectedTypeName = getTypeNameFromCSharpCompiler( type );
 		if( generatedTypeName != expectedTypeName )

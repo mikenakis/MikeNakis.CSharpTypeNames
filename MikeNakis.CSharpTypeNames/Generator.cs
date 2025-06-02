@@ -7,32 +7,38 @@ public enum Options
 	None = 0,
 
 	/// <summary>Specifies that language keywords for built-in types should not be used.</summary>
-	/// <remarks>For example, <b><c>System.Int32</c></b> will be generated instead of <b><c>int</c></b>.</remarks>
-	NoLanguageKeywordsForBuiltInTypes = 1 << 0,
+	/// <remarks>For example, <b><c>System.Int32</c></b> will be emitted instead of <b><c>int</c></b>.</remarks>
+	NoKeywordsForBuiltInTypes = 1 << 0,
 
 	/// <summary>Specifies that shorthand notation for nullable value types should not be used.</summary>
-	/// <remarks>For example, <b><c>System.Nullable&lt;System.DateTime&gt;</c></b> will be generated instead of <b><c>System.DateTime?</c></b>.</remarks>
+	/// <remarks>For example, <b><c>System.Nullable&lt;System.DateTime&gt;</c></b> will be generated instead of
+	/// <b><c>System.DateTime?</c></b>.</remarks>
 	NoNullableShorthandNotation = 1 << 1,
 
 	/// <summary>Specifies that generic parameter names should be emitted rather than left blank.</summary>
-	/// <remarks>For example, <b><c>System.Collections.Generic.Dictionary&lt;TKey,TValue&gt;</c></b> will be generated instead of <b><c>System.Collections.Generic.Dictionary&lt;,&gt;</c></b>.</remarks>
+	/// <remarks>For example, <b><c>System.Collections.Generic.Dictionary&lt;TKey,TValue&gt;</c></b> will be generated
+	/// instead of <b><c>System.Collections.Generic.Dictionary&lt;,&gt;</c></b>.<para/>
+	/// Note that the name of a generic type parameter will always be generated if it is directly asked for; this option
+	/// only applies to the appearance of generic type parameter names within the names of generic type definitions.</remarks>
 	EmitGenericParameterNames = 1 << 2,
 
-	/// <summary>Specifies that language keywords for native integer built-in types should not be used.</summary>
+	/// <summary>Specifies that language keywords for built-in native-sized integer types should not be used.</summary>
 	/// <remarks>For example, <b><c>System.IntPtr</c></b> will be generated instead of <b><c>nint</c></b>.<para/></remarks>
-	NoLanguageKeywordsForNativeIntegers = 1 << 3,
+	NoKeywordsForNativeSizedIntegers = 1 << 3,
 
-	/// <summary>Specifies that namespaces should not be used.</summary>
-	/// <remarks>For example, <b><c>DateTime</c></b> will be generated instead of <b><c>System.DateTime</c></b>.</remarks>
+	/// <summary>Specifies that namespaces should not be emitted.</summary>
+	/// <remarks>For example, <b><c>DateTime</c></b> will be emitted instead of <b><c>System.DateTime</c></b>.</remarks>
 	NoNamespaces = 1 << 4,
 
 	/// <summary>Specifies that tuple notation should not be used.</summary>
-	/// <remarks>For example, <b><c>System.ValueTuple&lt;System.Int32,System.String&gt;</c></b> will be generated instead of <b><c>(System.Int32,System.String)</c></b>.</remarks>
+	/// <remarks>For example, <b><c>System.ValueTuple&lt;int,int&gt;</c></b> will be generated instead of
+	/// <b><c>(int,int)</c></b>.</remarks>
 	NoTupleShorthandNotation = 1 << 5,
 
-	/// <summary>Specifies that the keyword of the type should be generated.</summary>
-	/// <remarks>For example, <b><c>interface IDisposable</c></b> will be generated instead of <b><c>IDisposable</c></b>.</remarks>
-	EmitTypeKeyword = 1 << 6,
+	/// <summary>Specifies that the keyword of the type definition should be emitted.</summary>
+	/// <remarks>For example, <b><c>interface IComparable&lt;int&gt;</c></b> will be generated instead of
+	/// <b><c>IComparable&lt;int&gt;</c></b>.</remarks>
+	EmitTypeDefinitionKeyword = 1 << 6,
 }
 
 public static class Generator
@@ -55,7 +61,7 @@ public static class Generator
 
 		void emitTypeKeyword( Sys.Type type, Options options )
 		{
-			if( !options.HasFlag( Options.EmitTypeKeyword ) )
+			if( !options.HasFlag( Options.EmitTypeDefinitionKeyword ) )
 				return;
 			if( getLanguageKeywordIfBuiltInType( type, options ) != null )
 				return;
@@ -110,7 +116,7 @@ public static class Generator
 				return;
 			}
 
-			if( !options.HasFlag( Options.NoLanguageKeywordsForBuiltInTypes ) )
+			if( !options.HasFlag( Options.NoKeywordsForBuiltInTypes ) )
 			{
 				string? languageKeyword = getLanguageKeywordIfBuiltInType( type, options );
 				if( languageKeyword != null )
@@ -273,7 +279,7 @@ public static class Generator
 				return "object";
 			if( type == typeof( void ) )
 				return "void";
-			if( !options.HasFlag( Options.NoLanguageKeywordsForNativeIntegers ) )
+			if( !options.HasFlag( Options.NoKeywordsForNativeSizedIntegers ) )
 			{
 				if( type == typeof( nint ) )
 					return "nint";
