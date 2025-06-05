@@ -6,6 +6,7 @@
 namespace MikeNakis.CSharpTypeNames.Drill;
 
 using MikeNakis.CSharpTypeNames.Extensions;
+using MikeNakis.Kit;
 using MikeNakis.Kit.Collections;
 using MikeNakis.Kit.Extensions;
 using MikeNakis.Kit.FileSystem;
@@ -19,6 +20,7 @@ sealed class CSharpTypeNamesDrillMain
 {
 	public static void Main( string[] _ )
 	{
+		StartupProjectDirectory.Initialize();
 		Console.ConsoleHelpers.Run( false, run );
 	}
 
