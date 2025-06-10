@@ -11,6 +11,17 @@
     <File Path="MikeNakis.CSharpTypeNames-Logo.svg" />
     <File Path="README.md" />
   </Folder>
+  <Folder Name="/_Solution Items/github-workflows/">
+    <File Path=".github/workflows/CSharpTypeNames-build-and-test-on-push.yml" />
+    <File Path=".github/workflows/CSharpTypeNames-publish-to-nuget-org.yml" />
+  </Folder>
+  <Folder Name="/_Solution Items/scripts/">
+    <File Path="scripts/build.bash" />
+    <File Path="scripts/publish.bash" />
+  </Folder>
+  <Project Path="MikeNakis.CSharpTypeNames.Drill/MikeNakis.CSharpTypeNames.Drill.csproj">
+    <BuildType Solution="Develop|*" Project="Release" />
+  </Project>
   <Project Path="MikeNakis.CSharpTypeNames.Test/MikeNakis.CSharpTypeNames.Test.csproj" />
   <Project Path="MikeNakis.CSharpTypeNames/MikeNakis.CSharpTypeNames.csproj" />
 </Solution>
