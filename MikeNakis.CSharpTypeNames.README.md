@@ -4,7 +4,9 @@
   <img title="MikeNakis.CSharpTypeNames Logo" src="MikeNakis.CSharpTypeNames-Logo.svg" width="256" />
 </p>
 
-[![Build](https://github.com/mikenakis/MikeNakis.CSharpTypeNames/actions/workflows/CSharpTypeNames-github-workflow.yml/badge.svg)](https://github.com/mikenakis/MikeNakis.CSharpTypeNames/actions/workflows/CSharpTypeNames-github-workflow.yml)
+[![Build](https://github.com/mikenakis/MikeNakis.CSharpTypeNames/actions/workflows/CSharpTypeNames-build-and-test-on-push.yml/badge.svg)](https://github.com/mikenakis/MikeNakis.CSharpTypeNames/actions/workflows/CSharpTypeNames-build-and-test-on-push.yml)
+[![Build](https://github.com/mikenakis/MikeNakis.CSharpTypeNames/actions/workflows/CSharpTypeNames-publish-to-nuget-org.yml/badge.svg)](https://github.com/mikenakis/MikeNakis.CSharpTypeNames/actions/workflows/CSharpTypeNames-publish-to-nuget-org.yml)
+
 
 ## What is MikeNakis.CSharpTypeNames?
 
