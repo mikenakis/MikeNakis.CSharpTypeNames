@@ -44,4 +44,8 @@
 		<None Include="README-for-nuget.md" Pack="True" PackagePath="/README.md" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<Compile Include="..\GlobalUsings.cs" />
+	</ItemGroup>
+
 </Project>

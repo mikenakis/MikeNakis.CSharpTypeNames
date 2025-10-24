@@ -30,5 +30,13 @@
 			</ItemGroup>
 		</Otherwise>
 	</Choose>
-	
+
+	<ItemGroup>
+		<Using Static="True" Include="MikeNakis.Kit.GlobalStatics" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="..\GlobalUsings.cs" />
+	</ItemGroup>
+
 </Project>
