@@ -1,9 +1,13 @@
 namespace MikeNakis.CSharpTypeNames.Test;
 
 using MikeNakis.CSharpTypeNames.Extensions;
-using CodeDom = Sys.CodeDom;
+using CodeDom = System.CodeDom;
 using CSharp = Microsoft.CSharp;
 using VSTesting = Microsoft.VisualStudio.TestTools.UnitTesting;
+using RegEx = System.Text.RegularExpressions;
+using Sys = System;
+using SysDiag = System.Diagnostics;
+using System.Collections.Generic;
 
 [VSTesting.TestClass]
 public sealed class T104_CSharpTypeNamesTests

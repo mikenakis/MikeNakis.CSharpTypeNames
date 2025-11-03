@@ -5,16 +5,24 @@
 
 namespace MikeNakis.CSharpTypeNames.Drill;
 
+using System.Collections.Generic;
+using System.Linq;
 using MikeNakis.CSharpTypeNames.Extensions;
 using MikeNakis.Kit;
 using MikeNakis.Kit.Collections;
 using MikeNakis.Kit.Extensions;
 using MikeNakis.Kit.FileSystem;
+using static System.MemoryExtensions;
 using static System.Reflection.Metadata.PEReaderExtensions;
-using CodeDom = Sys.CodeDom;
+using CodeDom = System.CodeDom;
 using CSharp = Microsoft.CSharp;
-using SysReflectMetadata = SysReflect.Metadata;
-using SysReflectPortableExecutable = SysReflect.PortableExecutable;
+using RegEx = System.Text.RegularExpressions;
+using Sys = System;
+using SysDiag = System.Diagnostics;
+using SysIo = System.IO;
+using SysReflect = System.Reflection;
+using SysReflectMetadata = System.Reflection.Metadata;
+using SysReflectPortableExecutable = System.Reflection.PortableExecutable;
 
 sealed class CSharpTypeNamesDrillMain
 {

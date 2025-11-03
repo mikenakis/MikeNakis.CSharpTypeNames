@@ -1,6 +1,8 @@
 #pragma warning disable CA1812 // Avoid uninstantiated internal classes
 #pragma warning disable CA1852 // Seal internal types
 
+using System.Collections.Generic;
+
 class C0<T1, T2>
 {
 	public T1 F1 = default!;

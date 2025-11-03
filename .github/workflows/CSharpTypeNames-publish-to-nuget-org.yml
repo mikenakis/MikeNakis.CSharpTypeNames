@@ -30,10 +30,10 @@ jobs:
       with:
         dotnet-version: 9.0.200
 
-    - run: scripts/build.bash Configuration=Develop
+    - run: build.bash Configuration=Develop
 
-    - run: scripts/publish.bash Configuration=Develop ProjectName=${{ github.event.repository.name }} Version=${{ steps.tag_bump.outputs.new_tag }} Address=https://api.nuget.org/v3/index.json ApiKey=${{ secrets.NUGET_API_KEY }}
+    - run: publish.bash Configuration=Develop ProjectName=${{ github.event.repository.name }} Version=${{ steps.tag_bump.outputs.new_tag }} Address=https://api.nuget.org/v3/index.json ApiKey=${{ secrets.NUGET_API_KEY }}
 
-    - run: scripts/build.bash Configuration=Release
+    - run: build.bash Configuration=Release
 
-    - run: scripts/publish.bash Configuration=Release ProjectName=${{ github.event.repository.name }} Version=${{ steps.tag_bump.outputs.new_tag }} Address=https://api.nuget.org/v3/index.json ApiKey=${{ secrets.NUGET_API_KEY }}
+    - run: publish.bash Configuration=Release ProjectName=${{ github.event.repository.name }} Version=${{ steps.tag_bump.outputs.new_tag }} Address=https://api.nuget.org/v3/index.json ApiKey=${{ secrets.NUGET_API_KEY }}
