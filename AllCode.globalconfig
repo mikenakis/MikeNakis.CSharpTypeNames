@@ -196,7 +196,11 @@ dotnet_diagnostic.IDE0027.severity = warning
 	csharp_style_expression_bodied_accessors = when_on_single_line
 
 # IDE0028: "Use collection initializers"
-dotnet_diagnostic.IDE0028.severity = silent
+# PEARL: We would like to set this to 'silent' instead of 'none', so that the refactoring is available, but when this is
+#   set to 'silent', fucking lame stupid Visual Studio will go apply different highlighting to the initialization
+#   statements that would be affected if the refactoring was applied. This is not particularly silent, is it? Fucking
+#   morons.
+dotnet_diagnostic.IDE0028.severity = none
 
 	dotnet_style_collection_initializer = true
 
@@ -1082,13 +1086,16 @@ dotnet_diagnostic.CA1052.severity = suggestion
 dotnet_diagnostic.CA1053.severity = warning
 
 # CA1054: "Uri parameters should not be strings"
-dotnet_diagnostic.CA1054.severity = warning
+dotnet_diagnostic.CA1054.severity = silent
+# Justification: #AintNoBodyGotNoTimeFoDat
 
 # CA1055: "Uri return values should not be strings"
-dotnet_diagnostic.CA1055.severity = warning
+dotnet_diagnostic.CA1055.severity = silent
+# Justification: #AintNoBodyGotNoTimeFoDat
 
 # CA1056: "Uri properties should not be strings"
-dotnet_diagnostic.CA1056.severity = warning
+dotnet_diagnostic.CA1056.severity = silent
+# Justification: #AintNoBodyGotNoTimeFoDat
 
 # CA1058: "Types should not extend certain base types"
 dotnet_diagnostic.CA1058.severity = warning
@@ -1602,7 +1609,8 @@ dotnet_diagnostic.CA2000.severity = none
 dotnet_diagnostic.CA2002.severity = suggestion
 
 # CA2007: "Consider calling ConfigureAwait on the awaited task"
-dotnet_diagnostic.CA2007.severity = warning
+dotnet_diagnostic.CA2007.severity = none
+# Justification: #AintNoBodyGotNoTimeFoDat
 
 # CA2008: "Do not create tasks without passing a TaskScheduler"
 dotnet_diagnostic.CA2008.severity = warning
@@ -1725,7 +1733,8 @@ dotnet_diagnostic.CA2231.severity = none
 # Justification: Not a warning because #AintNoBodyGotNoTimeFoDat.
 
 # CA2234: "Pass system uri objects instead of strings"
-dotnet_diagnostic.CA2234.severity = warning
+dotnet_diagnostic.CA2234.severity = none
+# Justification: Not a warning because #AintNoBodyGotNoTimeFoDat.
 
 # CA2235: "Mark all non-serializable fields"
 dotnet_diagnostic.CA2235.severity = warning
@@ -1929,7 +1938,8 @@ dotnet_diagnostic.CA3077.severity = warning
 dotnet_diagnostic.CA3147.severity = warning
 
 # CA5350: "Do Not Use Weak Cryptographic Algorithms"
-dotnet_diagnostic.CA5350.severity = warning
+dotnet_diagnostic.CA5350.severity = none
+# Justification: There is a place and a time for weak cryptographic algorithms .
 
 # CA5351: "Do Not Use Broken Cryptographic Algorithms"
 dotnet_diagnostic.CA5351.severity = warning
