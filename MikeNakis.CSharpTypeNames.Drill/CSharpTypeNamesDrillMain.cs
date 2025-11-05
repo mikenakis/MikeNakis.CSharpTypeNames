@@ -14,6 +14,7 @@ using MikeNakis.Kit.Extensions;
 using MikeNakis.Kit.FileSystem;
 using static System.MemoryExtensions;
 using static System.Reflection.Metadata.PEReaderExtensions;
+using static MikeNakis.Kit.GlobalStatics;
 using CodeDom = System.CodeDom;
 using CSharp = Microsoft.CSharp;
 using RegEx = System.Text.RegularExpressions;
