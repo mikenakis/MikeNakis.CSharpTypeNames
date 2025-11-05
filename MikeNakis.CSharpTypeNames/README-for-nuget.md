@@ -1,6 +1,11 @@
-# MikeNakis.CSharpTypeNames
-## A tiny library that computes the name of any System.Type in human-readable C# notation
+<!--- PEARL: nuget does not support any HTML in markdown, and it does not support images at all, not even in markdown syntax. -->
 
-<!--- PEARL: nuget supports only a small subset of markdown, which does not include images, and supports no HTML at all. -->
+nuget.org pretends to support markdown, but their support is lame beyond words, so:
 
-See the README.md in the repository of this project: https://github.com/mikenakis/MikeNakis.CSharpTypeNames
+Please visit this project on GitHub and see the README.md file.
+
+## License
+
+**All rights reserved.**
+
+For more information, see [LICENSE.md](LICENSE.md)
