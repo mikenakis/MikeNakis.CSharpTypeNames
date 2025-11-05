@@ -50,13 +50,6 @@ sealed class CSharpTypeNamesDrillMain
 
 	static int run()
 	{
-#if DEBUG
-		Sys.Console.WriteLine( "DEBUG" );
-#endif
-#if RELEASE
-		Sys.Console.WriteLine( "RELEASE" );
-#endif
-
 		// Studying Non-Generic Types */
 		{
 			Sys.Type type = typeof( string );
