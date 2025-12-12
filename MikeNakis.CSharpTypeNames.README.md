@@ -38,7 +38,7 @@ MikeNakis.CSharpTypeNames is quite efficient:
 
 - It uses a `StringBuilder` instead of string concatenation.
 - It refrains from any unnecessary memory allocations.
-- It avoids string search in all but one case where it is unavoidable due to bad design of the CLR.
+- It avoids string search in all but one case where it is unavoidable due to bad design of DotNet type names.
 - It completely avoids sub-string replacement.
 
 The MikeNakis.CSharpTypeNames.Drill project takes less than 30 milliseconds to generate the human-readable names of 13K types found in the DotNet SDK.
