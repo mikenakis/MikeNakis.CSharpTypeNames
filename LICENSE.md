@@ -10,4 +10,4 @@ with this software is view its source code and admire it.
 
 If you want to do anything else with this software, contact me.
 
-More information: [michael.gr - Open Source but No License](https://blog.michael.gr/2018/04/open-source-but-no-license.html)
+More information: [michael.gr - Open Source but No License](https://blog.michael.gr/post/2018-04-open-source-but-no-license/)

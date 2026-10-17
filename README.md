@@ -12,7 +12,7 @@ MikeNakis.CSharpTypeNames is a tiny library that generates human-readable dotnet
 
 To understand what problem this library solves, see the following blog post:
 
- - [michael.gr - Human-readable names of DotNet types in C# notation](https://blog.michael.gr/2025/05/human-readable-names-of-dotnet-types-in.html)
+ - [michael.gr - Human-readable names of DotNet types in C# notation](https://blog.michael.gr/post/2025-05-human-readable-names-of-dotnet-types-in/)
 
 MikeNakis.CSharpTypeNames exposes a single extension method on `System.Type` which can be used as a universal replacement for the `Name` and `FullName` properties of `System.Type`.
 
@@ -73,7 +73,7 @@ For more information, see [LICENSE.md](LICENSE.md)
 
 This project is written using _**my very own™**_ coding style.
 
-More information: [michael.gr - On Coding Style](https://blog.michael.gr/2018/04/on-coding-style.html)
+More information: [michael.gr - On Coding Style](https://blog.michael.gr/post/2018-04-on-coding-style/)
 
 ----------------------
 Cover image: The MikeNakis.CSharpTypeNames logo, by Mike Nakis.
