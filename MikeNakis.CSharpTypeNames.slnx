@@ -9,7 +9,6 @@
     <File Path=".editorconfig" />
     <File Path="exclusion.dic" />
     <File Path="LICENSE.md" />
-    <File Path="MikeNakis.CSharpTypeNames-Logo.svg" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/_Solution Items/github-workflows/">

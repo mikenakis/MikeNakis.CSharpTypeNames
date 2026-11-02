@@ -1,7 +1,7 @@
 # MikeNakis.CSharpTypeNames<br/><sub><sup>A tiny library that generates the human-readable name of any System.Type in C# notation.</sup></sub>
 
 <p align="center">
-  <img title="MikeNakis.CSharpTypeNames Logo" src="MikeNakis.CSharpTypeNames-Logo.svg" width="256" />
+  <img title="MikeNakis.CSharpTypeNames Logo" src="MikeNakis.CSharpTypeNames/MikeNakis.CSharpTypeNames-icon.svg" width="256" />
 </p>
 
 [![Build](https://github.com/mikenakis/MikeNakis.CSharpTypeNames/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/mikenakis/MikeNakis.CSharpTypeNames/actions/workflows/continuous-integration.yml)
